@@ -110,38 +110,6 @@ async function handleAnswer(question){
 
     addMessage(question,true);
 
-    try {
-        const response = await fetch(`${BASE_URL}/chat`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ message: question })
-        });
-
-        const data = await response.json();
-
-        if(data.reply){
-            addMessage(data.reply);
-        } else {
-            addMessage("No response from server.");
-        }
-
-    } catch (error) {
-        addMessage("Server error, please try again later.");
-        console.error(error);
-    }
-}
-async function handleAnswer(question){
-
-    if(question==="⬅ Back"){
-        chatOptions.innerHTML="";
-        showMainMenu();
-        return;
-    }
-
-    addMessage(question,true);
-
     // ✅ LOCAL BACKUP ANSWERS
     const answers = {
 
@@ -219,6 +187,7 @@ async function handleAnswer(question){
         addMessage(answers[question] || "Server error, please try again later.");
     }
 }
+
 
 // ------------------ INIT ------------------
 showMainMenu();
