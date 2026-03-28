@@ -1,5 +1,5 @@
 // ------------------ CONFIG ------------------
-const BASE_URL = "https://smart-museum-1-zzyi.onrender.com";
+const BASE_URL = "https://smart-museum-0xgs.onrender.com";
 
 const chatMessages = document.getElementById("chat-messages");
 const chatOptions = document.getElementById("chat-options");
