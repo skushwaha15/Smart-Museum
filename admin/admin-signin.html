@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Sign In | Smart Museum</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+        }
+
+        body{
+            background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+            color:#333;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        
+        .login-wrapper{
+            width:100%;
+            max-width:450px;
+            padding:20px;
+        }
+
+        .smart-museum-title{
+            text-align:center;
+            margin-bottom:30px;
+        }
+
+        .smart-museum-title h1{
+            color:white;
+            font-size:42px;
+            font-weight:bold;
+            letter-spacing:2px;
+            text-shadow:2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .smart-museum-title h1 i{
+            color:#e94560;
+            margin-right:10px;
+        }
+
+        .smart-museum-title p{
+            color:#aaa;
+            font-size:16px;
+            margin-top:5px;
+        }
+
+        
+        .signin-box{
+            background:white;
+            padding:40px;
+            width:100%;
+            border-radius:15px;
+            box-shadow:0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .signin-box h2{
+            text-align:center;
+            margin-bottom:25px;
+            color:#1a1a2e;
+        }
+
+        .form-group{
+            margin-bottom:20px;
+        }
+
+        .form-group label{
+            display:block;
+            margin-bottom:6px;
+            font-weight:600;
+            color:#374151;
+        }
+
+        .form-group input{
+            width:100%;
+            padding:12px;
+            border:2px solid #ddd;
+            border-radius:8px;
+            font-size:15px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus{
+            outline:none;
+            border-color:#e94560;
+            box-shadow:0 0 0 3px rgba(233,69,96,0.1);
+        }
+
+        .signin-btn{
+            width:100%;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#e94560;
+            color:white;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
+            transition: all 0.3s ease;
+        }
+
+        .signin-btn:hover{ 
+            background:#d63447;
+            transform: translateY(-1px);
+        }
+
+        .signin-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .forgot{
+            text-align:right;
+            margin-top:15px;
+        }
+
+        .forgot a{
+            color:#e94560;
+            font-size:14px;
+            text-decoration:none;
+        }
+
+        .forgot a:hover{ 
+            text-decoration:underline; 
+        }
+
+        .error{
+            background:#ffebee;
+            color:#c62828;
+            padding:12px;
+            border-radius:8px;
+            margin-bottom:15px;
+            display:none;
+            font-size:14px;
+            border-left:4px solid #c62828;
+        }
+
+        .success{
+            background:#e8f5e8;
+            color:#2e7d32;
+            padding:12px;
+            border-radius:8px;
+            margin-bottom:15px;
+            display:none;
+            font-size:14px;
+            border-left:4px solid #2e7d32;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 40px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: #e94560;
+        }
+
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .footer-links a {
+            color: #e94560;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        
+        .demo-hint {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .demo-hint p {
+            margin: 5px 0;
+            color: #6b7280;
+        }
+
+        .demo-hint code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #e94560;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    
+    <div class="smart-museum-title">
+        <h1><i class="fas fa-archway"></i> SmartMuseum</h1>
+        <p>Admin Portal</p>
+    </div>
+
+    
+    <div class="signin-box">
+        <h2><i class="fas fa-user-shield"></i> Admin Sign In</h2>
+
+        <div class="error" id="errorBox"></div>
+        <div class="success" id="successBox"></div>
+
+        <form id="adminForm">
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Admin Username</label>
+                <input type="text" id="username" placeholder="Enter admin username" autocomplete="username" required>
+            </div>
+
+            <div class="form-group password-toggle">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+                <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+            </div>
+
+            <button class="signin-btn" type="submit" id="loginBtn">
+                <span id="btnText">Login</span>
+            </button>
+
+            <div class="forgot">
+                <a href="admin-forgot.html"><i class="fas fa-key"></i> Forgot Password?</a>
+            </div>
+        </form>
+
+        
+        <div class="demo-hint">
+            <p><i class="fas fa-info-circle"></i> Demo Credentials:</p>
+            <p>Username: <code>admin</code> | Password: <code>Admin@123</code></p>
+        </div>
+    </div>
+
+    <div class="footer-links">
+        <p>© 2024 Smart Museum. All rights reserved.</p>
+    </div>
+</div>
+
+<script>
+
+const API_BASE_URL = "https://smart-museum-1.onrender.com";
+
+
+if(localStorage.getItem("adminToken")){
+    window.location.replace("admin-dashboard.html");
+}
+
+
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('password');
+
+togglePassword.addEventListener('click', function() {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    this.classList.toggle('fa-eye');
+    this.classList.toggle('fa-eye-slash');
+});
+
+
+document.getElementById("adminForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errorBox = document.getElementById("errorBox");
+    const successBox = document.getElementById("successBox");
+    const loginBtn = document.getElementById("loginBtn");
+    const btnText = document.getElementById("btnText");
+
+    
+    errorBox.style.display = "none";
+    successBox.style.display = "none";
+
+    
+    if (!username || !password) {
+        showError("⚠️ Both username and password are required!");
+        return;
+    }
+
+   
+    if (username.includes(' ')) {
+        showError("⚠️ Username should not contain spaces!");
+        return;
+    }
+
+    
+    if (password.length < 6) {
+        showError("⚠️ Password must be at least 6 characters long!");
+        return;
+    }
+
+    
+    loginBtn.disabled = true;
+    btnText.innerHTML = '<span class="spinner"></span> Signing in...';
+
+    try {
+        console.log("Attempting login to:", `${API_BASE_URL}/api/admin/login`);
+        
+        const res = await fetch(`${API_BASE_URL}/api/admin/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        console.log("Login response:", data);
+
+        if (data.success) {
+            
+            localStorage.setItem("adminToken", data.token || "admin_logged_in");
+            localStorage.setItem("adminName", data.admin?.name || username);
+            localStorage.setItem("adminEmail", data.admin?.email || "");
+            localStorage.setItem("adminId", data.admin?.id || "");
+            
+            
+            successBox.innerText = "✓ Login successful! Redirecting to dashboard...";
+            successBox.style.display = "block";
+            
+            
+            setTimeout(() => {
+                window.location.href = "admin-dashboard.html";
+            }, 1000);
+        } else {
+            showError(data.message || "❌ Invalid admin credentials. Please check username and password.");
+            resetButton();
+        }
+    } catch (err) {
+        console.error("Login error:", err);
+        showError(`❌ Cannot connect to server. Please check if backend is running at: ${API_BASE_URL}\n\nError: ${err.message}`);
+        resetButton();
+    }
+});
+
+function showError(message) {
+    const errorBox = document.getElementById("errorBox");
+    errorBox.innerText = message;
+    errorBox.style.display = "block";
+    
+    
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function resetButton() {
+    const loginBtn = document.getElementById("loginBtn");
+    const btnText = document.getElementById("btnText");
+    loginBtn.disabled = false;
+    btnText.innerHTML = 'Login';
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Admin Sign In page loaded with API:", API_BASE_URL);
+    const token = localStorage.getItem("adminToken");
+    if (token) {
+        // Auto-redirect to dashboard
+        window.location.href = "admin-dashboard.html";
+    }
+    
+    
+    document.getElementById("username").focus();
+});
+
+
+document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const form = document.getElementById("adminForm");
+        if (form && document.activeElement === document.getElementById("password")) {
+            form.requestSubmit();
+        }
+    }
+});
+
+
+document.getElementById("username").addEventListener("input", () => {
+    document.getElementById("errorBox").style.display = "none";
+});
+
+document.getElementById("password").addEventListener("input", () => {
+    document.getElementById("errorBox").style.display = "none";
+});
+</script>
+
+</body>
+</html>
