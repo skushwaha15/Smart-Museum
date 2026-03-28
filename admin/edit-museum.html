@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | Edit Museum</title>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body{
+    margin:0;
+    background:#f4f6f8;
+    font-family: Arial, sans-serif;
+}
+
+.header{
+    background:#1a1a2e;
+    color:#fff;
+    padding:18px 30px;
+    font-size:20px;
+    font-weight: bold;
+}
+
+.container{
+    max-width:1100px;
+    margin:30px auto;
+    padding:0 20px;
+}
+
+.card{
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    margin-bottom:30px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #1f2937;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+label{
+    font-weight:600;
+    display:block;
+    margin-bottom:5px;
+    color: #374151;
+}
+
+input,textarea{
+    width:100%;
+    padding:10px;
+    margin-bottom:12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.inline{
+    display:flex;
+    gap:10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.inline input {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.btn{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.btn.red{
+    background:#dc2626;
+}
+
+.btn.red:hover {
+    background: #b91c1c;
+}
+
+.btn.green {
+    background: #16a34a;
+}
+
+.btn.green:hover {
+    background: #15803d;
+}
+
+.btn.small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.message {
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.message.success {
+    display: block;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid #2e7d32;
+}
+
+.message.error {
+    display: block;
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #c62828;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #6b7280;
+}
+
+.gallery-item, .ticket-item {
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+@media (max-width: 768px) {
+    .container {
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+    .card {
+        padding: 20px;
+    }
+    .inline {
+        flex-direction: column;
+    }
+    .inline button {
+        width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Admin Panel — Edit Museum</div>
+
+<div class="container">
+
+
+<div class="card">
+    <h3>🏛️ Museum Information</h3>
+    <div id="message" class="message"></div>
+   
+    <label>Name</label>
+    <input id="name" placeholder="Museum name">
+   
+    <label>Description</label>
+    <textarea id="description" rows="4" placeholder="Museum description"></textarea>
+   
+    <label>Address</label>
+    <textarea id="address" rows="2" placeholder="Full address"></textarea>
+   
+    <div class="inline">
+        <div style="flex:1">
+            <label>Open Time</label>
+            <input type="time" id="open_time">
+        </div>
+        <div style="flex:1">
+            <label>Close Time</label>
+            <input type="time" id="close_time">
+        </div>
+    </div>
+   
+    <label>Main Image URL</label>
+    <input id="main_image" placeholder="https://example.com/image.jpg">
+   
+    <div class="inline">
+        <div style="flex:1">
+            <label>City</label>
+            <input id="city" placeholder="City">
+        </div>
+        <div style="flex:1">
+            <label>Category</label>
+            <input id="category" placeholder="History / Science / Art">
+        </div>
+    </div>
+   
+    <button class="btn" onclick="updateMuseum()" id="updateBtn">💾 Update Museum</button>
+</div>
+
+
+<div class="card">
+    <h3>🖼️ Gallery Images</h3>
+    <div class="inline">
+        <input id="newGalleryImage" placeholder="Image URL (e.g., https://example.com/image.jpg)">
+        <button class="btn green" onclick="addGallery()">➕ Add Image</button>
+    </div>
+    <div id="gallery" class="gallery-list"></div>
+</div>
+
+
+<div class="card">
+    <h3>🎟️ Ticket Types</h3>
+    <div class="inline">
+        <input id="newType" placeholder="Ticket type (e.g., Adult, Child, Senior)">
+        <input id="newPrice" placeholder="Price (e.g., 500)" type="number">
+        <button class="btn green" onclick="addTicket()">➕ Add Ticket</button>
+    </div>
+    <div id="tickets" class="ticket-list"></div>
+</div>
+
+</div>
+
+<script>
+
+const API_BASE_URL = "https://smart-museum-1.onrender.com";
+const museumId = new URLSearchParams(window.location.search).get("id");
+
+if (!museumId) {
+    alert("❌ Museum ID missing in URL");
+    throw new Error("Museum ID not found");
+}
+
+console.log("Edit museum page loaded with API:", API_BASE_URL);
+console.log("Museum ID:", museumId);
+
+function showMessage(text, type) {
+    const msgDiv = document.getElementById("message");
+    msgDiv.className = "message " + type;
+    msgDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${text}`;
+    msgDiv.style.display = "block";
+   
+    setTimeout(() => {
+        msgDiv.style.display = "none";
+    }, 5000);
+}
+
+function setLoading(buttonId, isLoading) {
+    const btn = document.getElementById(buttonId);
+    if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> Processing...';
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.id === 'updateBtn' ? '💾 Update Museum' :
+                       (btn.id === 'addGalleryBtn' ? '➕ Add Image' : '➕ Add Ticket');
+    }
+}
+
+
+async function loadMuseum() {
+    try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(`${API_BASE_URL}/api/admin/museum/${museumId}`, {
+            headers: {
+                "Authorization": token ? `Bearer ${token}` : "",
+                "Content-Type": "application/json"
+            }
+        });
+       
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+       
+        const m = await response.json();
+        console.log("✅ Museum loaded:", m);
+       
+        document.getElementById("name").value = m.name || "";
+        document.getElementById("description").value = m.description || "";
+        document.getElementById("address").value = m.address || "";
+        document.getElementById("open_time").value = m.open_time ? m.open_time.slice(0,5) : "";
+        document.getElementById("close_time").value = m.close_time ? m.close_time.slice(0,5) : "";
+        document.getElementById("main_image").value = m.main_image || "";
+        document.getElementById("city").value = m.city || "";
+        document.getElementById("category").value = m.category || "";
+       
+    } catch (err) {
+        console.error("❌ Load error:", err);
+        showMessage("Error loading museum: " + err.message, "error");
+    }
+}
+
+
+async function updateMuseum() {
+    const payload = {
+        name: document.getElementById("name").value,
+        description: document.getElementById("description").value,
+        address: document.getElementById("address").value,
+        open_time: document.getElementById("open_time").value,
+        close_time: document.getElementById("close_time").value,
+        main_image: document.getElementById("main_image").value,
+        city: document.getElementById("city").value,
+        category: document.getElementById("category").value
+    };
+   
+    
+    if (!payload.name || !payload.city || !payload.category) {
+        showMessage("Please fill in Name, City, and Category fields", "error");
+        return;
+    }
+   
+    setLoading('updateBtn', true);
+    console.log("📤 Sending update payload:", payload);
+   
+    try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(`${API_BASE_URL}/api/admin/museum/${museumId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : ""
+            },
+            body: JSON.stringify(payload)
+        });
+       
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+       
+        const data = await response.json();
+        console.log("Update response:", data);
+       
+        showMessage("✅ Museum updated successfully!", "success");
+       
+    } catch (err) {
+        console.error("❌ Update error:", err);
+        showMessage("❌ Update failed: " + err.message, "error");
+    } finally {
+        setLoading('updateBtn', false);
+    }
+}
+
+
+async function loadGallery() {
+    try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(`${API_BASE_URL}/api/admin/museum/${museumId}/gallery`, {
+            headers: {
+                "Authorization": token ? `Bearer ${token}` : "",
+                "Content-Type": "application/json"
+            }
+        });
+       
+        const data = await response.json();
+        const galleryDiv = document.getElementById("gallery");
+       
+        if (!data || data.length === 0) {
+            galleryDiv.innerHTML = '<div class="loading">📭 No gallery images added yet</div>';
+            return;
+        }
+       
+        galleryDiv.innerHTML = data.map(img => `
+            <div class="gallery-item inline">
+                <input value="${escapeHtml(img.image_url)}"
+                       onchange="updateGallery(${img.id}, this.value)"
+                       style="flex: 1;">
+                <button class="btn red small"
+                        onclick="deleteGallery(${img.id})">🗑 Delete</button>
+            </div>
+        `).join("");
+       
+    } catch (err) {
+        console.error("Load gallery error:", err);
+        document.getElementById("gallery").innerHTML = '<div class="loading">Error loading gallery</div>';
+    }
+}
+
+async function addGallery() {
+    const imageUrl = document.getElementById("newGalleryImage").value.trim();
+    if (!imageUrl) {
+        showMessage("Please enter an image URL", "error");
+        return;
+    }
+   
+    try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(`${API_BASE_URL}/api/admin/gallery`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : ""
+            },
+            body: JSON.stringify({
+                museum_id: parseInt(museumId),
+                image_url: imageUrl
+            })
+        });
+       
+        if (!response.ok) throw new Error("Add failed");
+       
+        document.getElementById("newGalleryImage").value = "";
+        await loadGallery();
+        showMessage("✅ Gallery image added!", "success");
+       
+    } catch (err) {
+        console.error("Add gallery error:", err);
+        showMessage("❌ Failed to add image", "error");
+    }
+}
+
+async function updateGallery(id, url) {
+    try {
+        const token = localStorage.getItem("adminToken");
+        await fetch(`${API_BASE_URL}/api/admin/gallery/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : ""
+            },
+            body: JSON.stringify({ image_url: url })
+        });
+       
+    } catch (err) {
+        console.error("Update gallery error:", err);
+        showMessage("Failed to update image", "error");
+    }
+}
+
+async function deleteGallery(id) {
+    if (!confirm("Are you sure you want to delete this image?")) return;
+   
+    try {
+        const token = localStorage.getItem("adminToken");
+        await fetch(`${API_BASE_URL}/api/admin/gallery/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": token ? `Bearer ${token}` : ""
+            }
+        });
+       
+        await loadGallery();
+        showMessage("✅ Image deleted successfully", "success");
+       
+    } catch (err) {
+        console.error("Delete gallery error:", err);
+        showMessage("Failed to delete image", "error");
+    }
+}
+
+
+async function loadTickets() {
+    try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(`${API_BASE_URL}/api/admin/museum/${museumId}/tickets`, {
+            headers: {
+                "Authorization": token ? `Bearer ${token}` : "",
+                "Content-Type": "application/json"
+            }
+        });
+       
+        const data = await response.json();
+        const ticketsDiv = document.getElementById("tickets");
+       
+        if (!data || data.length === 0) {
+            ticketsDiv.innerHTML = '<div class="loading">📭 No ticket types added yet</div>';
+            return;
+        }
+       
+        ticketsDiv.innerHTML = data.map(t => `
+            <div class="ticket-item inline">
+                <input value="${escapeHtml(t.type)}"
+                       onchange="updateTicket(${t.id}, this.value, ${t.price})"
+                       placeholder="Type"
+                       style="flex: 1;">
+                <input value="${t.price}"
+                       onchange="updateTicket(${t.id}, '${t.type}', this.value)"
+                       placeholder="Price"
+                       type="number"
+                       style="flex: 0.5;">
+                <button class="btn red small"
+                        onclick="deleteTicket(${t.id})">🗑 Delete</button>
+            </div>
+        `).join("");
+       
+    } catch (err) {
+        console.error("Load tickets error:", err);
+        document.getElementById("tickets").innerHTML = '<div class="loading">Error loading tickets</div>';
+    }
+}
+
+async function addTicket() {
+    const type = document.getElementById("newType").value.trim();
+    const price = document.getElementById("newPrice").value.trim();
+   
+    if (!type || !price) {
+        showMessage("Please enter both ticket type and price", "error");
+        return;
+    }
+   
+    if (isNaN(price) || price <= 0) {
+        showMessage("Please enter a valid price", "error");
+        return;
+    }
+   
+    try {
+        const token = localStorage.getItem("adminToken");
+        const response = await fetch(`${API_BASE_URL}/api/admin/ticket`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : ""
+            },
+            body: JSON.stringify({
+                museum_id: parseInt(museumId),
+                type: type,
+                price: parseFloat(price)
+            })
+        });
+       
+        if (!response.ok) throw new Error("Add failed");
+       
+        document.getElementById("newType").value = "";
+        document.getElementById("newPrice").value = "";
+        await loadTickets();
+        showMessage("✅ Ticket type added!", "success");
+       
+    } catch (err) {
+        console.error("Add ticket error:", err);
+        showMessage("❌ Failed to add ticket", "error");
+    }
+}
+
+async function updateTicket(id, type, price) {
+    try {
+        const token = localStorage.getItem("adminToken");
+        await fetch(`${API_BASE_URL}/api/admin/ticket/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": token ? `Bearer ${token}` : ""
+            },
+            body: JSON.stringify({
+                type: type,
+                price: parseFloat(price)
+            })
+        });
+       
+    } catch (err) {
+        console.error("Update ticket error:", err);
+    }
+}
+
+async function deleteTicket(id) {
+    if (!confirm("Are you sure you want to delete this ticket type?")) return;
+   
+    try {
+        const token = localStorage.getItem("adminToken");
+        await fetch(`${API_BASE_URL}/api/admin/ticket/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": token ? `Bearer ${token}` : ""
+            }
+        });
+       
+        await loadTickets();
+        showMessage("✅ Ticket type deleted", "success");
+       
+    } catch (err) {
+        console.error("Delete ticket error:", err);
+        showMessage("Failed to delete ticket", "error");
+    }
+}
+
+function escapeHtml(text) {
+    if(!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+
+(function(){
+    const token = localStorage.getItem("adminToken");
+    if(!token){
+        window.location.replace("admin-signin.html");
+    }
+   
+    const adminName = localStorage.getItem("adminName");
+    if(adminName){
+        // Optional: display admin name
+        console.log("Logged in as:", adminName);
+    }
+})();
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Edit museum page initialized");
+    loadMuseum();
+    loadGallery();
+    loadTickets();
+});
+</script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</body>
+</html>

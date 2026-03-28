@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Bookings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  display:flex;
+}
+
+
+.sidebar{
+  width:240px;
+  min-height:100vh;
+  background:#1f2937;
+  color:#fff;
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  overflow-y:auto;
+  padding-top:20px;
+}
+
+.sidebar h2{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.sidebar a{
+    display:block;
+    padding:12px 22px;
+    color:#d1d5db;
+    text-decoration:none;
+}
+
+.sidebar a:hover{
+    background:#374151;
+    color:#fff;
+}
+
+
+.main{
+  margin-left:240px;
+  width:calc(100% - 240px);
+  padding:25px;
+}
+
+
+.topbar{
+  background:white;
+  padding:15px 25px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  position:sticky;
+  top:0;
+  z-index:5;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.profile{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.admin-name{
+  font-weight:bold;
+  color:#374151;
+}
+
+.avatar{
+  width:36px;
+  height:36px;
+  background:#2563eb;
+  color:white;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.dropdown{
+  position:absolute;
+  right:0;
+  top:48px;
+  background:white;
+  border-radius:8px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.15);
+  width:150px;
+  display:none;
+  overflow:hidden;
+  z-index:100;
+}
+
+.dropdown a{
+  display:block;
+  padding:10px 15px;
+  text-decoration:none;
+  color:#374151;
+  font-size:14px;
+}
+
+.dropdown a:hover{
+  background:#f3f4f6;
+}
+
+html, body{
+  height:100%;
+}
+
+.main{
+  overflow-y:auto;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+
+table{
+    width:100%;
+    background:white;
+    border-collapse:collapse;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+
+th,td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+    text-align:left;
+}
+
+th{
+    background:#f9fafb;
+    font-weight:600;
+    color:#374151;
+}
+
+tr:hover{
+    background:#f9fafb;
+}
+
+.status-paid{
+    color:green;
+    font-weight:bold;
+}
+
+.status-pending{
+    color:orange;
+    font-weight:bold;
+}
+
+.status-cancel{
+    color:red;
+    font-weight:bold;
+}
+
+
+.refresh-btn{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:14px;
+    margin-left:15px;
+}
+
+.refresh-btn:hover{
+    background:#1d4ed8;
+}
+
+
+.loading{
+    text-align:center;
+    padding:40px;
+    color:#6b7280;
+}
+
+.no-data{
+    text-align:center;
+    padding:40px;
+    color:#6b7280;
+}
+
+
+@media (max-width:768px){
+    .sidebar{
+        width:200px;
+    }
+    .main{
+        margin-left:200px;
+        width:calc(100% - 200px);
+        padding:15px;
+    }
+    th,td{
+        padding:8px;
+        font-size:14px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+
+<div class="sidebar">
+    <h2>Smart Museum</h2>
+    <a href="admin-dashboard.html">📊 Dashboard</a>
+    <a href="admin-museums.html">🏛️ Museums</a>
+    <a href="admin-bookings.html">🎟️ Bookings</a>
+    <a href="admin-users.html">👥 Users</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+</div>
+
+
+<div class="main">
+
+
+<div class="topbar">
+  <div style="display:flex; align-items:center; gap:15px;">
+    <h3 style="margin:0;">All Bookings</h3>
+    <button class="refresh-btn" onclick="loadBookings()">🔄 Refresh</button>
+  </div>
+
+  <div class="profile">
+    <span class="admin-name" id="adminName">Admin</span>
+    <div class="avatar" onclick="toggleProfile()">👤</div>
+    <div class="dropdown" id="profileDropdown">
+      <a href="admin-profile.html">My Profile</a>
+      <a href="#" onclick="logout()">Sign Out</a>
+    </div>
+  </div>
+</div>
+
+<h2>📋 All Bookings</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Name</th>
+            <th>Museum</th>
+            <th>Visit Date</th>
+            <th>Adults</th>
+            <th>Children</th>
+            <th>Amount</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="bookingTable">
+        <tr>
+            <td colspan="8" class="loading">Loading bookings...</td>
+        </tr>
+    </tbody>
+</table>
+
+</div>
+
+<script>
+
+
+const API_BASE_URL = "https://smart-museum-1.onrender.com";
+
+
+(function(){
+    const token = localStorage.getItem("adminToken");
+    const adminName = localStorage.getItem("adminName");
+
+    if(!token){
+        window.location.replace("admin-signin.html");
+    }
+    
+
+    if(adminName){
+        document.getElementById("adminName").innerText = adminName;
+    }
+})();
+
+
+function toggleProfile(){
+  const d = document.getElementById("profileDropdown");
+  d.style.display = d.style.display === "block" ? "none" : "block";
+}
+
+window.onclick = function(e){
+  if(!e.target.closest(".profile")){
+    document.getElementById("profileDropdown").style.display = "none";
+  }
+};
+
+
+function logout(){
+    if(confirm("Are you sure you want to logout?")){
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminName");
+        localStorage.removeItem("adminEmail");
+        window.location.replace("admin-signin.html");
+    }
+}
+
+
+async function loadBookings(){
+    try{
+        const token = localStorage.getItem("adminToken");
+        
+       
+        const table = document.getElementById("bookingTable");
+        table.innerHTML = '<tr><td colspan="8" class="loading">Loading bookings...</td></tr>';
+        
+        const res = await fetch(`${API_BASE_URL}/api/admin/bookings`, {
+            method: "GET",
+            headers: {
+                "Authorization": token ? `Bearer ${token}` : "",
+                "Content-Type": "application/json"
+            }
+        });
+        
+        const data = await res.json();
+        console.log("Bookings response:", data);
+        
+        table.innerHTML = "";
+
+        if(!data.success || !data.bookings || data.bookings.length === 0){
+            table.innerHTML = '<tr><td colspan="8" class="no-data">📭 No bookings found</td></tr>';
+            return;
+        }
+
+        data.bookings.forEach(b => {
+            let statusClass = "status-pending";
+            let statusText = b.payment_status || "PENDING";
+            
+            if(statusText === "PAID") statusClass = "status-paid";
+            if(statusText === "CANCELLED") statusClass = "status-cancel";
+            
+            
+            let visitDate = b.visit_date || "N/A";
+            if(visitDate !== "N/A" && visitDate.includes("T")){
+                visitDate = visitDate.split("T")[0];
+            }
+
+            const row = `
+            <tr>
+                <td>${b.booking_id || b.id || "N/A"}</td>
+                <td>${b.name || b.user_name || "N/A"}</td>
+                <td>${b.museum_name || b.museum || "N/A"}</td>
+                <td>${visitDate}</td>
+                <td>${b.num_adults || b.adults || 0}</td>
+                <td>${b.num_children || b.children || 0}</td>
+                <td>₹${b.amount_paid || b.amount || 0}</td>
+                <td class="${statusClass}">${statusText}</td>
+            </tr>
+            `;
+            
+            table.innerHTML += row;
+        });
+        
+        
+        const totalBookings = data.bookings.length;
+        console.log(`Total bookings loaded: ${totalBookings}`);
+
+    } catch(err){
+        console.error("Error loading bookings:", err);
+        document.getElementById("bookingTable").innerHTML = 
+        `<tr><td colspan="8" class="no-data" style="color:red;">❌ Server error: ${err.message}<br><br>Make sure backend is running at: ${API_BASE_URL}</td></tr>`;
+    }
+}
+
+
+let refreshInterval;
+
+function startAutoRefresh(){
+    if(refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+        loadBookings();
+    }, 30000); 
+}
+
+function stopAutoRefresh(){
+    if(refreshInterval){
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+}
+
+
+loadBookings();
+
+
+document.addEventListener("visibilitychange", function() {
+    if(document.hidden){
+        stopAutoRefresh();
+    } else {
+        loadBookings(); 
+    }
+});
+
+</script>
+
+</body>
+</html>

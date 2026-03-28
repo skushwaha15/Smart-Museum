@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin | Add Museum</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{margin:0;background:#f4f6f8;font-family:Arial}
+.header{background:#1a1a2e;color:#fff;padding:18px 30px;font-size:20px}
+.container{max-width:1100px;margin:30px auto;padding:0 20px}
+.card{background:#fff;padding:25px;border-radius:10px;margin-bottom:30px}
+label{font-weight:600;display:block;margin-bottom:5px}
+input,textarea{width:100%;padding:10px;margin-bottom:12px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box}
+.inline{display:flex;gap:10px}
+.btn{background:#16a34a;color:#fff;border:none;padding:12px 16px;font-size:15px;cursor:pointer;border-radius:5px}
+.btn:hover{background:#15803d}
+</style>
+</head>
+
+<body>
+
+<div class="header">Admin Panel — Add New Museum</div>
+
+<div class="container">
+
+<!-- MUSEUM FORM -->
+<div class="card">
+
+<label>Name</label>
+<input id="name" placeholder="e.g. National Science Museum">
+
+<label>Description</label>
+<textarea id="description" placeholder="About the museum" rows="3"></textarea>
+
+<label>Address</label>
+<textarea id="address" placeholder="Full address" rows="2"></textarea>
+
+<label>Open Time</label>
+<input type="time" id="open_time">
+
+<label>Close Time</label>
+<input type="time" id="close_time">
+
+<label>Main Image URL</label>
+<input id="main_image" placeholder="Paste image link">
+
+<label>City</label>
+<input id="city" placeholder="Delhi">
+
+<label>Category</label>
+<input id="category" placeholder="History / Science / Art">
+
+<button class="btn" onclick="createMuseum()">➕ Create Museum</button>
+
+</div>
+</div>
+
+<script>
+
+const API_BASE_URL = "https://smart-museum-1.onrender.com";
+
+function createMuseum(){
+
+    const name = document.getElementById("name").value;
+    const description = document.getElementById("description").value;
+    const address = document.getElementById("address").value;
+    const open_time = document.getElementById("open_time").value;
+    const close_time = document.getElementById("close_time").value;
+    const main_image = document.getElementById("main_image").value;
+    const city = document.getElementById("city").value;
+    const category = document.getElementById("category").value;
+
+    if(!name || !city || !category){
+        alert("Please fill in Name, City, and Category fields");
+        return;
+    }
+
+    const payload = {
+        name: name,
+        description: description,
+        address: address,
+        open_time: open_time,
+        close_time: close_time,
+        main_image: main_image,
+        city: city,
+        category: category
+    };
+
+    console.log("Sending payload:", payload);
+
+    fetch(`${API_BASE_URL}/api/admin/museum`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(async res => {
+        const data = await res.json();
+        console.log("Response:", data);
+        
+        if(res.ok && data.success){
+          
+            window.location.href = "edit-museum.html?id=" + data.id;
+        } else {
+            alert("Museum not created: " + (data.message || "Unknown error"));
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Server error: " + err.message + "\n\nMake sure your backend is running on: " + API_BASE_URL);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter' && e.target.type !== 'textarea') {
+                e.preventDefault();
+                createMuseum();
+            }
+        });
+    });
+});
+
+</script>
+
+</body>
+</html>

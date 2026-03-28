@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Users</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  display:flex;
+}
+
+/* Sidebar */
+.sidebar{
+  width:240px;
+  min-height:100vh;
+  background:#1f2937;
+  color:#fff;
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
+  overflow-y:auto;
+  padding-top:20px;
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 12px 22px;
+    color: #d1d5db;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background: #374151;
+    color: #fff;
+}
+
+/* Main */
+.main{
+  margin-left:240px;
+  width:calc(100% - 240px);
+  padding:25px;
+  overflow-y:auto;
+}
+
+/* ===== TOPBAR ADDED ===== */
+.topbar{
+  background:white;
+  padding:15px 25px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  position:sticky;
+  top:0;
+  z-index:5;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.profile{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.admin-name{
+  font-weight:bold;
+  color:#374151;
+}
+
+.avatar{
+  width:36px;
+  height:36px;
+  background:#2563eb;
+  color:white;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.dropdown{
+  position:absolute;
+  right:0;
+  top:48px;
+  background:white;
+  border-radius:8px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.15);
+  width:150px;
+  display:none;
+  overflow:hidden;
+}
+
+.dropdown a{
+  display:block;
+  padding:10px 15px;
+  text-decoration:none;
+  color:#374151;
+  font-size:14px;
+}
+
+.dropdown a:hover{
+  background:#f3f4f6;
+}
+
+html, body{
+  height:100%;
+}
+
+/* Table */
+table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+th {
+    background: #f9fafb;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Smart Museum</h2>
+    <a href="admin-dashboard.html">📊 Dashboard</a>
+    <a href="admin-museums.html">🏛️ Museums</a>
+    <a href="admin-bookings.html">🎟️ Bookings</a>
+    <a href="admin-users.html">👥 Users</a>
+    <a href="#" onclick="logout()">🚪 Logout</a>
+</div>
+
+<div class="main">
+
+<!-- ===== TOPBAR ===== -->
+
+<div class="topbar">
+  <h3>All Registered Users</h3>
+
+  <div class="profile">
+    <span class="admin-name">Admin</span>
+    <div class="avatar" onclick="toggleProfile()">👤</div>
+
+
+<div class="dropdown" id="profileDropdown">
+  <a href="#">My Profile</a>
+  <a href="#" onclick="logout()">Sign Out</a>
+</div>
+
+
+  </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Gender</th>
+            <th>Age</th>
+        </tr>
+    </thead>
+    <tbody id="userTable">
+        <tr>
+            <td colspan="6">Loading users...</td>
+        </tr>
+    </tbody>
+</table>
+
+</div>
+
+<script>
+// AUTH CHECK
+(function(){
+    const token = localStorage.getItem("adminToken");
+
+    if(!token){
+        window.location.replace("admin-signin.html");
+    }
+})();
+
+/* PROFILE DROPDOWN */
+function toggleProfile(){
+  const d=document.getElementById("profileDropdown");
+  d.style.display=d.style.display==="block"?"none":"block";
+}
+
+window.onclick=function(e){
+  if(!e.target.closest(".profile")){
+    document.getElementById("profileDropdown").style.display="none";
+  }
+};
+
+/* LOGOUT */
+function logout(){
+    if(confirm("Are you sure you want to logout?")){
+
+        // remove login session
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminName");
+
+        // prevent back button login
+        window.location.replace("admin-signin.html");
+    }
+}
+
+/* LOAD USERS */
+async function loadUsers() {
+    try {
+        const res = await fetch("https://smart-museum-1.onrender.com/api/admin/users");
+        const data = await res.json();
+
+        const table = document.getElementById("userTable");
+        table.innerHTML = "";
+
+        if (!data.success || data.users.length === 0) {
+            table.innerHTML = "<tr><td colspan='6'>No users found</td></tr>";
+            return;
+        }
+
+        data.users.forEach(user => {
+            const row = `
+                <tr>
+                    <td>${user.user_id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone_number || "-"}</td>
+                    <td>${user.gender || "-"}</td>
+                    <td>${user.age || "-"}</td>
+                </tr>
+            `;
+            table.innerHTML += row;
+        });
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("userTable").innerHTML =
+            "<tr><td colspan='6'>Server error</td></tr>";
+    }
+}
+
+loadUsers();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - Smart Museum Jaipur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .city {
+            font-size: 14px;
+            color: #ddd;
+            margin-top: -5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+
+        
+        .forgot-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 5%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .forgot-box {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .forgot-header {
+            margin-bottom: 40px;
+        }
+
+        .forgot-header h1 {
+            font-size: 32px;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .forgot-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .input-with-icon input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-with-icon input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .forgot-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .forgot-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .forgot-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-link {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .back-link a {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left-color: #c62828;
+        }
+
+        .error i {
+            margin-right: 8px;
+        }
+
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #2e7d32;
+        }
+
+        .success i {
+            margin-right: 8px;
+        }
+
+        .info {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border-left-color: #1976d2;
+        }
+
+        
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        
+        .otp-container {
+            margin: 15px 0;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .otp-inputs input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .otp-inputs input:focus {
+            border-color: #e94560;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+        }
+
+        .resend-otp {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .resend-otp button {
+            background: none;
+            border: none;
+            color: #e94560;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .resend-otp button:disabled {
+            color: #999;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
+        
+        .timer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .auth-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .forgot-box {
+                padding: 30px 25px;
+                margin: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .forgot-header h1 {
+                font-size: 28px;
+            }
+
+            .forgot-box {
+                padding: 25px 20px;
+            }
+
+            .otp-inputs input {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+
+        
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    
+    <div class="forgot-container">
+        <div class="forgot-box">
+            <div class="forgot-header">
+                <h1><i class="fas fa-unlock-alt"></i> Forgot Password</h1>
+                <p>Reset your password using OTP verification</p>
+            </div>
+            
+            <div id="message" class="message">
+                <i class="fas fa-info-circle"></i>
+                <span id="messageText"></span>
+            </div>
+            
+            
+            <div id="step1" class="step active">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="Enter your registered email" required>
+                    </div>
+                </div>
+                
+                <button onclick="sendOTP()" id="sendOtpBtn" class="forgot-button">Send OTP</button>
+                
+                <div class="back-link">
+                    <a href="admin-signin.html"><i class="fas fa-arrow-left"></i> Back to Sign In</a>
+                </div>
+            </div>
+
+            
+            <div id="step2" class="step">
+                <div class="form-group">
+                    <label>Enter OTP</label>
+                    <div class="otp-container">
+                        <div class="otp-inputs" id="otpInputs">
+                            <input type="text" maxlength="1" class="otp-digit" data-index="0">
+                            <input type="text" maxlength="1" class="otp-digit" data-index="1">
+                            <input type="text" maxlength="1" class="otp-digit" data-index="2">
+                            <input type="text" maxlength="1" class="otp-digit" data-index="3">
+                            <input type="text" maxlength="1" class="otp-digit" data-index="4">
+                            <input type="text" maxlength="1" class="otp-digit" data-index="5">
+                        </div>
+                        <div class="resend-otp">
+                            <button id="resendOtpBtn" onclick="resendOTP()" disabled>Resend OTP</button>
+                            <div id="timer" class="timer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <div class="input-with-icon password-container">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="newPassword" placeholder="Enter new password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button onclick="verifyOTP()" id="resetBtn" class="forgot-button">Reset Password</button>
+                
+                <div class="back-link">
+                    <a href="javascript:void(0)" onclick="goBackToStep1()"><i class="fas fa-arrow-left"></i> Back to Email</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+const API_BASE_URL = "https://smart-museum-1.onrender.com";
+
+let resendTimer = null;
+let timerSeconds = 60;
+let storedEmail = "";
+
+function showMessage(text, type) {
+    const box = document.getElementById("message");
+    const textEl = document.getElementById("messageText");
+    box.style.display = "block";
+    textEl.innerText = text;
+    box.className = "message " + type;
+    
+   
+    setTimeout(() => {
+        if (box.style.display === "block") {
+            box.style.display = "none";
+        }
+    }, 5000);
+}
+
+function hideMessage() {
+    document.getElementById("message").style.display = "none";
+}
+
+function goToStep(n) {
+    document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+    document.getElementById("step" + n).classList.add("active");
+    hideMessage();
+}
+
+function goBackToStep1() {
+    stopResendTimer();
+    goToStep(1);
+    document.getElementById("email").value = storedEmail;
+}
+
+function setLoading(buttonId, isLoading) {
+    const btn = document.getElementById(buttonId);
+    if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.id === 'sendOtpBtn' ? 'Send OTP' : 'Reset Password';
+    }
+}
+
+
+function setupOTPInputs() {
+    const inputs = document.querySelectorAll('.otp-digit');
+    inputs.forEach((input, index) => {
+        input.addEventListener('keyup', function(e) {
+            if (e.key >= '0' && e.key <= '9') {
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            } else if (e.key === 'Backspace') {
+                if (index > 0 && !this.value) {
+                    inputs[index - 1].focus();
+                }
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.value.length > 1) {
+                this.value = this.value[0];
+            }
+        });
+    });
+}
+
+function getOTPValue() {
+    const inputs = document.querySelectorAll('.otp-digit');
+    let otp = '';
+    inputs.forEach(input => {
+        otp += input.value;
+    });
+    return otp;
+}
+
+
+function startResendTimer() {
+    timerSeconds = 60;
+    const timerEl = document.getElementById('timer');
+    const resendBtn = document.getElementById('resendOtpBtn');
+    
+    if (resendTimer) clearInterval(resendTimer);
+    
+    resendTimer = setInterval(() => {
+        if (timerSeconds <= 0) {
+            clearInterval(resendTimer);
+            timerEl.textContent = '';
+            resendBtn.disabled = false;
+        } else {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            timerEl.textContent = `Resend available in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            timerSeconds--;
+        }
+    }, 1000);
+}
+
+function stopResendTimer() {
+    if (resendTimer) {
+        clearInterval(resendTimer);
+        resendTimer = null;
+    }
+}
+
+
+async function sendOTP() {
+    const email = document.getElementById("email").value.trim();
+    
+    if (!email) {
+        return showMessage("Please enter admin email", "error");
+    }
+    
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        return showMessage("Please enter a valid email address", "error");
+    }
+    
+    setLoading('sendOtpBtn', true);
+    hideMessage();
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/send-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+        console.log("Send OTP response:", data);
+
+        if (data.success) {
+            storedEmail = email;
+            showMessage("OTP sent to your email address. Please check your inbox.", "success");
+            goToStep(2);
+            setupOTPInputs();
+            startResendTimer();
+            
+            
+            setTimeout(() => {
+                document.querySelector('.otp-digit')?.focus();
+            }, 100);
+        } else {
+            showMessage(data.message || "Failed to send OTP. Please check if email is registered as admin.", "error");
+        }
+    } catch (err) {
+        console.error("Send OTP error:", err);
+        showMessage("Server error. Please try again later. Make sure backend is running at: " + API_BASE_URL, "error");
+    } finally {
+        setLoading('sendOtpBtn', false);
+    }
+}
+
+
+async function resendOTP() {
+    if (!storedEmail) {
+        showMessage("Email not found. Please go back and enter email again.", "error");
+        goBackToStep1();
+        return;
+    }
+    
+    const resendBtn = document.getElementById('resendOtpBtn');
+    resendBtn.disabled = true;
+    hideMessage();
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/admin/send-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: storedEmail })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            showMessage("New OTP sent to your email", "success");
+            startResendTimer();
+            
+            
+            document.querySelectorAll('.otp-digit').forEach(input => {
+                input.value = '';
+            });
+            document.querySelector('.otp-digit')?.focus();
+        } else {
+            showMessage(data.message || "Failed to resend OTP", "error");
+            resendBtn.disabled = false;
+        }
+    } catch (err) {
+        console.error("Resend OTP error:", err);
+        showMessage("Server error. Please try again.", "error");
+        resendBtn.disabled = false;
+    }
+}
+
+
+async function verifyOTP() {
+    const otp = getOTPValue();
+    const newPassword = document.getElementById("newPassword").value.trim();
+
+    if (!otp || otp.length !== 6) {
+        return showMessage("Please enter the 6-digit OTP", "error");
+    }
+    
+    if (!newPassword) {
+        return showMessage("Please enter a new password", "error");
+    }
+
+   
+    const passRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (!passRegex.test(newPassword)) {
+        return showMessage(
+            "Password must be at least 8 characters with uppercase, number & special character (@$!%*?&)",
+            "error"
+        );
+    }
+
+    setLoading('resetBtn', true);
+    hideMessage();
+
+    try {
+        
+        const verifyRes = await fetch(`${API_BASE_URL}/api/admin/verify-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: storedEmail, otp })
+        });
+
+        const v = await verifyRes.json();
+        console.log("Verify OTP response:", v);
+        
+        if (!v.success) {
+            showMessage(v.message || "Invalid OTP. Please try again.", "error");
+            setLoading('resetBtn', false);
+            return;
+        }
+
+        
+        const resetRes = await fetch(`${API_BASE_URL}/api/admin/reset-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: storedEmail, newPassword })
+        });
+
+        const r = await resetRes.json();
+        console.log("Reset password response:", r);
+
+        if (r.success) {
+            showMessage(
+                "✅ Password reset successful! Redirecting to Admin Sign In...",
+                "success"
+            );
+
+            setTimeout(() => {
+                window.location.href = "admin-signin.html";
+            }, 2000);
+        } else {
+            showMessage(r.message || "Password reset failed. Please try again.", "error");
+        }
+
+    } catch (err) {
+        console.error("Reset password error:", err);
+        showMessage("Server error. Please try again later.", "error");
+    } finally {
+        setLoading('resetBtn', false);
+    }
+}
+
+function togglePassword() {
+    const passwordInput = document.getElementById("newPassword");
+    const icon = document.querySelector("#step2 .toggle-password i");
+    
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        passwordInput.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Forgot password page loaded with API:", API_BASE_URL);
+    
+    
+    document.getElementById("email")?.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            sendOTP();
+        }
+    });
+    
+    document.getElementById("newPassword")?.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            verifyOTP();
+        }
+    });
+});
+</script>
+
+</body>
+</html>
