@@ -895,8 +895,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
                 gender: gender || "",
                 userId: userId || ""
             },
-            success_url: "https://smart-museum-1.onrender.com/frontend/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url: "https://smart-museum-1.onrender.com/frontend/payment-cancel.html",
+            success_url: "https://frontend-rho-nine-45.vercel.app/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url: "https://frontend-rho-nine-45.vercel.app/payment-cancel.html",
         });
 
         console.log("✅ Session created:", session.id);
