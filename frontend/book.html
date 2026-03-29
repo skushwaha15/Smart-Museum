@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMuseum - Ticket Booking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+       
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+       
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .city {
+            font-size: 14px;
+            color: #ddd;
+            margin-top: -5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+       
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+       
+        .booking-form-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+       
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2c3e50;
+            font-size: 2rem;
+        }
+       
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+       
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #444;
+        }
+       
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+       
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+       
+        /* Style for readonly fields */
+        .form-control[readonly] {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+       
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+       
+        .form-col {
+            flex: 1;
+        }
+       
+        .ticket-type {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+       
+        .ticket-type-item {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+       
+        .ticket-type-item:hover {
+            border-color: #3498db;
+            background-color: #f8f9fa;
+        }
+       
+        .ticket-type-item.selected {
+            border-color: #3498db;
+            background-color: #ebf5fb;
+        }
+       
+        .ticket-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #3498db;
+            margin-top: 0.5rem;
+        }
+       
+        .ticket-count {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+       
+        .count-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+       
+        .ticket-quantity {
+            margin: 0 1rem;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+       
+        .total-price {
+            text-align: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 1.5rem 0;
+            color: #2c3e50;
+        }
+       
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+       
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+       
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+       
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+       
+        .confirmation {
+            display: none;
+            background-color: #e8f5e9;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-left: 5px solid #4caf50;
+        }
+       
+        .confirmation h3 {
+            color: #2e7d32;
+            margin-bottom: 1rem;
+        }
+       
+        .confirmation-details {
+            background-color: white;
+            border-radius: 5px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+       
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+       
+        .detail-label {
+            flex: 1;
+            font-weight: 600;
+            color: #555;
+        }
+       
+        .detail-value {
+            flex: 2;
+            color: #333;
+        }
+       
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+       
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+       
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-links li {
+                margin: 0.5rem;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+                margin-top: 1rem;
+            }
+           
+            .auth-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+           
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+           
+            .ticket-type {
+                flex-direction: column;
+            }
+           
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+        
+    
+        .profile-wrapper {
+            position: relative;
+        }
+
+        
+        .profile-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #e9e6e6;
+            color: #202357;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        
+        .profile-menu {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 260px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 9999;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: #000;
+        }
+
+        
+        .profile-header {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-header h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #000;
+        }
+
+        .profile-header span {
+            font-size: 13px;
+            color: #000;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .profile-header span:hover {
+            opacity: 1;
+        }
+
+        
+        .profile-item {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            color: #000;
+        }
+
+        .profile-item:hover {
+            background: #f2f2f2;
+        }
+
+    
+        .profile-divider {
+            height: 1px;
+            background: #ddd;
+        }
+
+        
+        .profile-signout {
+            padding: 17px;
+            text-align: center;
+            color: #000000;
+            font-weight: 600;
+            cursor: pointer;
+            border-top: 1px solid #ddd;
+        }
+
+        .profile-signout:hover {
+            background: #000;
+            color: #fff;
+        }
+    </style>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+    
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">Smart<span>Museum</span></div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index1.html">Home</a></li>
+            <li><a href="aboutus.html">About Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        
+        <div class="auth-buttons" id="authButtons"></div>
+    </nav>
+
+    
+    <div class="container">
+        <h1 class="page-title">Museum Ticket Booking</h1>
+       
+        <div class="booking-form-container">
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading museum details...</p>
+            </div>
+            
+            <form id="bookingForm">
+                
+               
+                <div class="form-group">
+                    <label for="museumName">Museum Name</label>
+                    <input type="text" id="museumName" class="form-control" readonly>
+                </div>
+               
+                <div class="form-group">
+                    <label for="visitDate">Visit Date</label>
+                    <input type="date" id="visitDate" class="form-control" required>
+                </div>
+               
+                <div class="form-group">
+                    <label>Ticket Type & Quantity</label>
+                    <div class="ticket-type">
+                        <div class="ticket-type-item selected" data-type="adult">
+                            <div>Adult</div>
+                            <div class="ticket-price">₹0</div>
+                            <div class="ticket-count">
+                                <button type="button" class="count-btn minus">-</button>
+                                <span class="ticket-quantity">1</span>
+                                <button type="button" class="count-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="ticket-type-item" data-type="child">
+                            <div>Child (5-12 years)</div>
+                            <div class="ticket-price">₹0</div>
+                            <div class="ticket-count">
+                                <button type="button" class="count-btn minus">-</button>
+                                <span class="ticket-quantity">0</span>
+                                <button type="button" class="count-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" class="form-control" placeholder="Enter your age">
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="email">Email </label>
+                            <input type="email" id="email" class="form-control" placeholder="Enter your email" readonly required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number" required>
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-control">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer-not-to-say">Prefer not to say</option>
+                    </select>
+                </div>
+               
+                <div class="total-price">
+                    Total Amount: <span id="totalAmount">₹0</span>
+                </div>
+               
+                <button type="button" id="bookBtn" class="btn btn-primary btn-block">Review Booking</button>
+            </form>
+           
+            
+            <div id="confirmation" class="confirmation">
+                <h3><i class="fas fa-check-circle"></i> Review Your Booking</h3>
+                <p>Please verify your details before payment:</p>
+               
+                <div class="confirmation-details">
+                
+                    <div class="detail-row">
+                        <div class="detail-label">Museum:</div>
+                        <div class="detail-value" id="confirmMuseum">Loading...</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Visit Date:</div>
+                        <div class="detail-value" id="confirmDate">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tickets:</div>
+                        <div class="detail-value" id="confirmTickets">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Total Amount:</div>
+                        <div class="detail-value" id="confirmAmount">₹0</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Name:</div>
+                        <div class="detail-value" id="confirmName">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Email:</div>
+                        <div class="detail-value" id="confirmEmail">-</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Phone:</div>
+                        <div class="detail-value" id="confirmPhone">-</div>
+                    </div>
+                </div>
+               
+                <button type="button" id="payNowBtn" class="btn btn-primary">Proceed to Pay ₹<span id="payAmount">0</span></button>
+                <button type="button" onclick="document.getElementById('confirmation').style.display='none'" class="btn" style="margin-left:10px; background:#ccc;">Edit Details</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="aboutus.html">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Smart Museum Blog</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Help & Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Partner With Us</h3>
+                <ul>
+                    <li><a href="#">Museum Partnerships</a></li>
+                    <li><a href="#">Affiliate Program</a></li>
+                    <li><a href="#">Advertise With Us</a></li>
+                    <li><a href="#">Museum API</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Download Our App</h3>
+                <p>Book museums on the go with our mobile app</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Smart Museum. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // ===== BACKEND URL - INTEGRATED WITH DEPLOYED LINK =====
+        const BACKEND_URL = 'https://smart-museum-1.onrender.com';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const authButtons = document.getElementById("authButtons");
+            const user = JSON.parse(localStorage.getItem("currentUser"));
+
+            if (!authButtons) return;
+
+            if (!user) {
+                authButtons.innerHTML = `
+                    <button onclick="window.location.href='signin.html'">Sign In</button>
+                    <button onclick="window.location.href='register.html'">Register</button>
+                `;
+                return;
+            }
+
+            authButtons.innerHTML = `
+                <div class="profile-wrapper">
+                    <div class="profile-icon" onclick="toggleProfileMenu(event)">
+                        ${user.username.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div class="profile-menu" id="profileMenu">
+                        <div class="profile-header">
+                            <h4>Hey, ${user.username}</h4>
+                            <span onclick="goToedit()">Edit Profile ›</span>
+                        </div>
+
+                        <div class="profile-item">🔔 Notifications</div>
+                        <div class="profile-item" onclick="goToContact()">🆘 Help & Support</div>
+
+                        <div class="profile-divider"></div>
+
+                        <div class="profile-signout" onclick="logout()">Sign out</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById("profileMenu");
+            if (menu)
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        document.addEventListener("click", () => {
+            const menu = document.getElementById("profileMenu");
+            if (menu) menu.style.display = "none";
+        });
+
+        function goToContact() {
+            window.location.href = "contact.html";
+        }
+
+        function goToedit() {
+            window.location.href = "edit-profile.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("currentUser");
+            window.location.href = "index1.html";
+        }
+
+        function formatTime(time) {
+            return time ? time.slice(0, 5) : '';
+        }
+
+        
+
+        document.addEventListener('DOMContentLoaded', function() {
+        
+            const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+            
+            if (!currentUser) {
+                sessionStorage.setItem("redirectAfterLogin", window.location.href);
+                alert("⚠️ Please login first to book tickets!");
+                window.location.href = "signin.html";
+                return;
+            }
+            
+            console.log("✅ User is logged in:", currentUser);
+            console.log("🔍 User object keys:", Object.keys(currentUser));
+            console.log("🔍 user_id value:", currentUser.user_id);
+            
+        
+            if (currentUser) {
+                document.getElementById('fullName').value = currentUser.username || '';
+                document.getElementById('email').value = currentUser.email || '';
+                document.getElementById('phone').value = currentUser.phone_number || '';
+                document.getElementById('age').value = currentUser.age || '';
+                
+                
+                if (currentUser.gender) {
+                    const genderSelect = document.getElementById('gender');
+                    const genderValue = currentUser.gender.toLowerCase();
+                    if (genderValue === 'male') genderSelect.value = 'male';
+                    else if (genderValue === 'female') genderSelect.value = 'female';
+                    else if (genderValue === 'other') genderSelect.value = 'other';
+                }
+                
+                console.log("✅ Form auto-filled with user data");
+            }
+
+        
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const formattedToday = `${yyyy}-${mm}-${dd}`;
+            document.getElementById("visitDate").setAttribute("min", formattedToday);
+
+            
+            
+            const params = new URLSearchParams(window.location.search);
+            const museumId = params.get("id");
+            
+            
+            document.getElementById('loading').style.display = 'block';
+            
+            let adultPrice = 0;
+            let childPrice = 0;
+            let museumName = '';
+            let museumIdValue = museumId;
+
+            if (museumId) {
+                
+                // Using deployed backend URL for museum details
+                fetch(`${BACKEND_URL}/api/museum/${museumId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        museumName = data.name;
+                        museumIdValue = data.id;
+                        
+                        document.getElementById('museumName').value = data.name;
+                        document.getElementById('confirmMuseum').textContent = data.name;
+                        document.getElementById('loading').style.display = 'none';
+                    })
+                    .catch(err => {
+                        console.error('Error fetching museum details:', err);
+                        document.getElementById('loading').innerHTML = '<p>Error loading museum details. Please try again.</p>';
+                    });
+
+                
+                // Using deployed backend URL for tickets
+                fetch(`${BACKEND_URL}/api/museum/${museumId}/tickets`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(tickets => {
+                        const adultTicket = tickets.find(t => t.type.toLowerCase() === "adult");
+                        const childTicket = tickets.find(t => t.type.toLowerCase() === "child");
+
+                        adultPrice = adultTicket ? adultTicket.price : 0;
+                        childPrice = childTicket ? childTicket.price : 0;
+
+                        document.querySelector('.ticket-type-item[data-type="adult"] .ticket-price').textContent = `₹${adultPrice}`;
+                        document.querySelector('.ticket-type-item[data-type="child"] .ticket-price').textContent = `₹${childPrice}`;
+
+                        updateTotalAmount();
+                    })
+                    .catch(err => {
+                        console.error('Error fetching ticket prices:', err);
+                        adultPrice = 500;
+                        childPrice = 250;
+                        
+                        document.querySelector('.ticket-type-item[data-type="adult"] .ticket-price').textContent = `₹${adultPrice}`;
+                        document.querySelector('.ticket-type-item[data-type="child"] .ticket-price').textContent = `₹${childPrice}`;
+                        
+                        updateTotalAmount();
+                    });
+            }
+
+            
+            const countButtons = document.querySelectorAll('.count-btn');
+            countButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const ticketItem = this.closest('.ticket-type-item');
+                    const quantitySpan = ticketItem.querySelector('.ticket-quantity');
+                    let quantity = parseInt(quantitySpan.textContent);
+
+                    if (this.classList.contains('plus')) {
+                        quantity++;
+                    } else if (this.classList.contains('minus') && quantity > 0) {
+                        quantity--;
+                    }
+
+                    quantitySpan.textContent = quantity;
+                    updateTotalAmount();
+                });
+            });
+
+            
+            function updateTotalAmount() {
+                const adultQuantity = parseInt(document.querySelector('.ticket-type-item[data-type="adult"] .ticket-quantity').textContent) || 0;
+                const childQuantity = parseInt(document.querySelector('.ticket-type-item[data-type="child"] .ticket-quantity').textContent) || 0;
+                const totalAmount = (adultQuantity * adultPrice) + (childQuantity * childPrice);
+                document.getElementById('totalAmount').textContent = `₹${totalAmount}`;
+            }
+
+            
+            document.getElementById('bookBtn').addEventListener('click', function() {
+                const fullName = document.getElementById('fullName').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const visitDate = document.getElementById('visitDate').value;
+                const adultQuantity = parseInt(document.querySelector('.ticket-type-item[data-type="adult"] .ticket-quantity').textContent) || 0;
+                const childQuantity = parseInt(document.querySelector('.ticket-type-item[data-type="child"] .ticket-quantity').textContent) || 0;
+                const totalAmount = document.getElementById('totalAmount').textContent;
+                const amountValue = parseInt(totalAmount.replace('₹', ''));
+                
+                
+                if (!fullName) {
+                    alert('Please enter your full name');
+                    return;
+                }
+                
+                if (!email) {
+                    alert('Please enter your email');
+                    return;
+                }
+                
+                if (!phone) {
+                    alert('Please enter your phone number');
+                    return;
+                }
+                
+                if (!visitDate) {
+                    alert('Please select a visit date');
+                    return;
+                }
+                
+                if (adultQuantity === 0 && childQuantity === 0) {
+                    alert('Please select at least one ticket');
+                    return;
+                }
+                
+                if (amountValue < 50) {
+                    alert('Total amount must be at least ₹50');
+                    return;
+                }
+                
+                
+                document.getElementById('confirmName').textContent = fullName;
+                document.getElementById('confirmEmail').textContent = email;
+                document.getElementById('confirmPhone').textContent = phone;
+                document.getElementById('confirmDate').textContent = new Date(visitDate).toLocaleDateString('en-IN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const ticketText = [];
+                if (adultQuantity > 0) ticketText.push(`${adultQuantity} Adult`);
+                if (childQuantity > 0) ticketText.push(`${childQuantity} Child`);
+                document.getElementById('confirmTickets').textContent = ticketText.join(', ');
+                
+                document.getElementById('confirmAmount').textContent = totalAmount;
+                document.getElementById('payAmount').textContent = amountValue;
+                
+                
+                document.getElementById('confirmation').style.display = 'block';
+                document.getElementById('confirmation').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            
+            document.getElementById("payNowBtn").addEventListener("click", async function() {
+               
+                const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+                
+                if (!currentUser) {
+                    alert("Session expired! Please login again.");
+                    window.location.href = "signin.html";
+                    return;
+                }
+                
+                const userId = currentUser.user_id || currentUser.id || currentUser.userId;
+                
+                console.log("🔍 DEBUG - CurrentUser:", currentUser);
+                console.log("🔍 DEBUG - userId found:", userId);
+                
+                if (!userId) {
+                    alert("Error: User ID not found. Please login again.");
+                    console.error("No user_id in currentUser:", currentUser);
+                    return;
+                }
+                
+                const amountText = document.getElementById("confirmAmount").textContent;
+                const amount = parseInt(amountText.replace("₹", ""));
+                const museumName = document.getElementById("confirmMuseum").textContent;
+                const ticketType = document.getElementById("confirmTickets").textContent;
+                const email = document.getElementById("confirmEmail").textContent;
+                const visitDate = document.getElementById("visitDate").value;
+                const fullName = document.getElementById("confirmName").textContent;
+                const phone = document.getElementById("confirmPhone").textContent;
+                const age = document.getElementById("age").value;
+                const gender = document.getElementById("gender").value;
+                const museumId = new URLSearchParams(window.location.search).get("id");
+                
+                this.disabled = true;
+                this.textContent = "Processing...";
+                
+                console.log("📤 Sending to backend with userId:", userId);
+                
+                try {
+                    // Using deployed backend URL for checkout session
+                    const response = await fetch(`${BACKEND_URL}/api/create-checkout-session`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            amount: amount,
+                            museumName: museumName,
+                            ticketType: ticketType,
+                            email: email,
+                            visitDate: visitDate,
+                            museumId: museumId,
+                            userName: fullName,
+                            userAge: age,
+                            phoneNumber: phone,
+                            gender: gender,
+                            userId: userId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    console.log("📥 Backend response:", data);
+
+                    if (data.success && data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        alert("Payment failed: " + (data.message || "Unknown error"));
+                        this.disabled = false;
+                        this.textContent = "Proceed to Pay ₹" + amount;
+                    }
+                } catch (error) {
+                    console.error("❌ Error:", error);
+                    alert("Error connecting to server");
+                    this.disabled = false;
+                    this.textContent = "Proceed to Pay ₹" + amount;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

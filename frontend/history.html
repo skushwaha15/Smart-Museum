@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Booking History - Smart Museum</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+       
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .city {
+            font-size: 14px;
+            color: #ddd;
+            margin-top: -5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background-color: transparent;
+            border: 1px solid #e94560;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #e94560;
+        }
+
+        /* Profile wrapper for dropdown */
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #e9e6e6;
+            color: #202357;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 260px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 9999;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: #000;
+        }
+
+        .profile-header {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-header h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #000;
+        }
+
+        .profile-header span {
+            font-size: 13px;
+            color: #000;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .profile-header span:hover {
+            opacity: 1;
+        }
+
+        .profile-item {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            color: #000;
+        }
+
+        .profile-item:hover {
+            background: #f2f2f2;
+        }
+
+        .profile-divider {
+            height: 1px;
+            background: #ddd;
+        }
+
+        .profile-signout {
+            padding: 17px;
+            text-align: center;
+            color: #000000;
+            font-weight: 600;
+            cursor: pointer;
+            border-top: 1px solid #ddd;
+        }
+
+        .profile-signout:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-size: 2rem;
+        }
+
+        .page-title i {
+            color: #e94560;
+            margin-right: 10px;
+        }
+
+        .stats-card {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #e94560;
+            color: white;
+            border-color: #e94560;
+        }
+
+        /* Bookings Grid */
+        .bookings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .booking-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            border-left: 4px solid #e94560;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .booking-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-used {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .booking-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .museum-icon {
+            width: 50px;
+            height: 50px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .museum-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .booking-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .booking-details {
+            margin: 1rem 0;
+            padding: 1rem 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-label {
+            color: #666;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .booking-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .booking-id {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #e94560;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 10px;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #999;
+            margin-bottom: 2rem;
+        }
+
+        .book-now-btn {
+            background-color: #e94560;
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .book-now-btn:hover {
+            background-color: #d63447;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .bookings-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">Smart<span>Museum</span></div>
+            
+        </div>
+        <ul class="nav-links">
+            <li><a href="index1.html">Home</a></li>
+            <li><a href="aboutus.html">About Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="auth-buttons" id="authButtons">
+            <!-- Will be filled by JavaScript -->
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-history"></i> My Booking History
+            </h1>
+            <div class="stats-card">
+                <div class="stats-number" id="totalBookings">0</div>
+                <div class="stats-label">Total Visits</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading your bookings...</p>
+        </div>
+
+        <!-- Bookings Grid -->
+        <div id="bookingsContainer" class="bookings-container">
+            <!-- Will be filled by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="aboutus.html">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Smart Museum Blog</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Help & Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Partner With Us</h3>
+                <ul>
+                    <li><a href="#">Museum Partnerships</a></li>
+                    <li><a href="#">Affiliate Program</a></li>
+                    <li><a href="#">Advertise With Us</a></li>
+                    <li><a href="#">Museum API</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Download Our App</h3>
+                <p>Book museums on the go with our mobile app</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Smart Museum. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // ===== BACKEND URL - INTEGRATED WITH DEPLOYED LINK =====
+        const BACKEND_URL = 'https://smart-museum-1.onrender.com';
+
+        // ========== PROFILE DROPDOWN FUNCTIONS ==========
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById("profileMenu");
+            if (menu) {
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+            }
+        }
+
+        function goToContact() {
+            window.location.href = "contact.html";
+        }
+
+        function goToedit() {
+            window.location.href = "edit-profile.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("currentUser");
+            window.location.href = "index1.html";
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", () => {
+            const menu = document.getElementById("profileMenu");
+            if (menu) menu.style.display = "none";
+        });
+
+        // ========== MAIN HISTORY FUNCTIONS ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!currentUser) {
+                // Redirect to login if not logged in
+                sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                window.location.href = 'signin.html';
+                return;
+            }
+
+            // Get user ID - IMPORTANT: user_id from login response
+            const userId = currentUser.user_id || currentUser.id;
+            
+            console.log('👤 Current User:', currentUser);
+            console.log('🆔 User ID:', userId);
+
+            if (!userId) {
+                alert('User ID not found. Please login again.');
+                window.location.href = 'signin.html';
+                return;
+            }
+
+            // Update auth buttons with profile dropdown
+            updateAuthButtons(currentUser);
+
+            // Load bookings using userId with deployed backend URL
+            loadUserBookings(userId);
+
+            // Setup filter buttons
+            setupFilters();
+        });
+
+        function updateAuthButtons(user) {
+            const authButtons = document.getElementById('authButtons');
+            
+            if (user) {
+                authButtons.innerHTML = `
+                    <div class="profile-wrapper">
+                        <div class="profile-icon" onclick="toggleProfileMenu(event)">
+                            ${(user.username || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div class="profile-menu" id="profileMenu">
+                            <div class="profile-header">
+                                <h4>Hey, ${user.username || 'User'}</h4>
+                                <span onclick="goToedit()">Edit Profile ›</span>
+                            </div>
+                            <div class="profile-item" onclick="window.location.href='history.html'">📜 Booking History</div>
+                            <div class="profile-item" onclick="goToContact()">🆘 Help & Support</div>
+                            <div class="profile-divider"></div>
+                            <div class="profile-signout" onclick="logout()">Sign out</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                authButtons.innerHTML = `
+                    <button onclick="window.location.href='signin.html'">Sign In</button>
+                    <button onclick="window.location.href='register.html'">Register</button>
+                `;
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString('en-IN', options);
+        }
+
+        // Format visit date
+        function formatVisitDate(dateString) {
+            const options = { 
+                weekday: 'long',
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            };
+            return new Date(dateString).toLocaleDateString('en-IN', options);
+        }
+
+        // Load user bookings using USER ID - Using deployed backend URL
+        async function loadUserBookings(userId) {
+            const loading = document.getElementById('loading');
+            const container = document.getElementById('bookingsContainer');
+
+            try {
+                loading.style.display = 'block';
+                
+                console.log('📡 Fetching bookings for user ID:', userId);
+                console.log('📡 Using backend URL:', BACKEND_URL);
+                
+                // ✅ Using deployed backend URL for bookings
+                const response = await fetch(`${BACKEND_URL}/api/user/${userId}/bookings`);
+                const data = await response.json();
+
+                console.log('📦 Bookings response:', data);
+
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    displayBookings(data.bookings);
+                } else {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <h3>Error loading bookings</h3>
+                            <p>${data.message || 'Something went wrong'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                loading.style.display = 'none';
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Connection Error</h3>
+                        <p>Failed to connect to server. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display bookings
+        function displayBookings(bookings) {
+            const container = document.getElementById('bookingsContainer');
+            const totalBookings = document.getElementById('totalBookings');
+            const currentFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+
+            totalBookings.textContent = bookings.length;
+
+            if (bookings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>No Bookings Yet!</h3>
+                        <p>You haven't made any museum bookings yet.</p>
+                        <a href="index.html" class="book-now-btn">Browse Museums</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Filter bookings
+            let filteredBookings = bookings;
+            const today = new Date().toISOString().split('T')[0];
+
+            if (currentFilter === 'upcoming') {
+                filteredBookings = bookings.filter(b => b.visit_date >= today);
+            } else if (currentFilter === 'completed') {
+                filteredBookings = bookings.filter(b => b.visit_date < today);
+            }
+
+            if (filteredBookings.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <h3>No ${currentFilter} bookings</h3>
+                        <p>You don't have any ${currentFilter} bookings at the moment.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            
+            filteredBookings.forEach(booking => {
+                // Determine status
+                const isUpcoming = booking.visit_date >= today;
+                const statusClass = isUpcoming ? 'status-paid' : 'status-used';
+                const statusText = isUpcoming ? 'Upcoming' : 'Completed';
+                
+                html += `
+                    <div class="booking-card">
+                        <div class="booking-status ${statusClass}">${statusText}</div>
+                        <div class="booking-header">
+                            <div class="museum-icon">
+                                <i class="fas fa-landmark"></i>
+                            </div>
+                            <div class="museum-info">
+                                <h3>${booking.museum_name || 'Museum'}</h3>
+                                <div class="booking-date">
+                                    <i class="far fa-calendar-alt"></i> Booked: ${formatDate(booking.booking_date)}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Visit Date:</span>
+                                <span class="detail-value">${formatVisitDate(booking.visit_date)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Tickets:</span>
+                                <span class="detail-value">
+                                    ${booking.num_adults} Adult${booking.num_adults > 1 ? 's' : ''}, 
+                                    ${booking.num_children} Child${booking.num_children > 1 ? 'ren' : ''}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Total Paid:</span>
+                                <span class="detail-value">₹${booking.amount_paid}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Visitor:</span>
+                                <span class="detail-value">${booking.name}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="booking-footer">
+                            <span class="booking-id">ID: ${booking.booking_id}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Setup filter buttons
+        function setupFilters() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked
+                    this.classList.add('active');
+                    
+                    // Reload bookings with filter
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                    if (currentUser && currentUser.user_id) {
+                        loadUserBookings(currentUser.user_id);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

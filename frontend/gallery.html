@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Smart Museum Jaipur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+       
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .city {
+            font-size: 14px;
+            color: #ddd;
+            margin-top: -5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+
+        
+        .gallery-hero {
+            background: linear-gradient(rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.8)), 
+                        url('https://images.unsplash.com/photo-1564325724739-bae0bd4ffc8e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 100px 5%;
+        }
+
+        .gallery-hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .gallery-hero p {
+            font-size: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+       
+        .gallery-section {
+            padding: 60px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .gallery-item {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+       
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .auth-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .gallery-hero h1 {
+                font-size: 36px;
+            }
+
+            .gallery-hero p {
+                font-size: 18px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+              .profile-wrapper {
+    position: relative;
+}
+
+
+.profile-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e9e6e6;
+    color: #202357;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+
+.profile-menu {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 260px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 9999;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: #000;
+}
+
+
+.profile-header {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #000;
+}
+
+.profile-header span {
+    font-size: 13px;
+    color: #000;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.profile-header span:hover {
+    opacity: 1;
+}
+
+
+.profile-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #000;
+}
+
+.profile-item:hover {
+    background: #f2f2f2;
+}
+
+
+.profile-divider {
+    height: 1px;
+    background: #ddd;
+}
+
+
+.profile-signout {
+    padding: 17px;
+    text-align: center;
+    color: #000000;
+    font-weight: 600;
+    cursor: pointer;
+    border-top: 1px solid #ddd;
+}
+
+.profile-signout:hover {
+    background: #000;
+    color: #fff;
+}
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">Smart<span>Museum</span></div>
+            <div class="city">Jaipur</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index1.html">Home</a></li>
+            <li><a href="aboutus.html">About Us</a></li>
+            <li><a href="gallery.html" style="color: #e94560;">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+       <div class="auth-buttons" id="authButtons">
+
+
+          
+        </div>
+    </nav>
+
+    
+    <section class="gallery-hero">
+        <h1>Our Gallery</h1>
+        <p>Explore the magnificent collection of artifacts, artworks, and historical treasures from Rajasthan's rich heritage</p>
+    </section>
+
+    
+    <section class="gallery-section">
+        <div class="gallery-grid">
+           
+            <div class="gallery-item">
+                <img src="images/img1.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img2.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img3.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img4.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img5.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img6.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img7.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img8.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img9.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img10.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img11.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img12.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img13.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img14.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img15.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img16.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img17.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img18.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img19.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img20.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+
+            <div class="gallery-item">
+                <img src="images/img21.jpg" alt="Museum Artifact" class="gallery-img">
+            </div>
+        </div>
+    </section>
+
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="aboutus.html">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Smart Museum Blog</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Help & Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Partner With Us</h3>
+                <ul>
+                    <li><a href="#">Museum Partnerships</a></li>
+                    <li><a href="#">Affiliate Program</a></li>
+                    <li><a href="#">Advertise With Us</a></li>
+                    <li><a href="#">Museum API</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Download Our App</h3>
+                <p>Book museums on the go with our mobile app</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Smart Museum, Jaipur. All rights reserved.
+        </div>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+    const authButtons = document.getElementById("authButtons");
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!authButtons) return;
+
+    if (!user) {
+        authButtons.innerHTML = `
+            <button onclick="window.location.href='signin.html'">Sign In</button>
+            <button onclick="window.location.href='register.html'">Register</button>
+        `;
+        return;
+    }
+
+    authButtons.innerHTML = `
+        <div class="profile-wrapper">
+            <div class="profile-icon" onclick="toggleProfileMenu(event)">
+                ${user.username.charAt(0).toUpperCase()}
+            </div>
+
+            <div class="profile-menu" id="profileMenu">
+                <div class="profile-header">
+                    <h4>Hey, ${user.username}</h4>
+                    <span onclick="goToedit()">Edit Profile ›</span>
+                </div>
+
+                <div class="profile-item">🔔 Notifications</div>
+                <div class="profile-item" onclick="goToContact()">🆘 Help & Support</div>
+
+                <div class="profile-divider"></div>
+
+                <div class="profile-signout" onclick="logout()">Sign out</div>
+            </div>
+        </div>
+    `;
+});
+
+function toggleProfileMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById("profileMenu");
+    if (menu)
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+document.addEventListener("click", () => {
+    const menu = document.getElementById("profileMenu");
+    if (menu) menu.style.display = "none";
+});
+
+function goToContact() {
+    window.location.href = "contact.html";
+}
+
+function goToedit() {
+    window.location.href = "edit-profile.html";
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    window.location.href = "index1.html";
+}
+
+    </script>
+    <script src="js/profile.js"></script>
+
+</body>
+</html>

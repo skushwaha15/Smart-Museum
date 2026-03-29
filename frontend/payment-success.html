@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Successful - Smart Museum</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1d2671, #c33764);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      width: 90%;
+      max-width: 500px;
+      padding: 40px 30px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      animation: pop 0.8s ease;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.6);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .check {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, #00c853, #64dd17);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: #fff;
+      font-size: 45px;
+      box-shadow: 0 10px 20px rgba(0, 200, 83, 0.4);
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #c33764;
+      border-radius: 50%;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    #statusMessage {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+      min-height: 50px;
+    }
+
+    .details {
+      background: #f6f7fb;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      color: #444;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      color: #1d2671;
+    }
+
+    .detail-value.success {
+      color: #00c853;
+    }
+
+    .detail-value.error {
+      color: #c33764;
+    }
+
+    .error-box {
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .error-box h3 {
+      color: #c33764;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .error-box p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #1d2671, #c33764);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 500;
+      transition: 0.3s ease;
+      box-shadow: 0 10px 20px rgba(195, 55, 100, 0.4);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(195, 55, 100, 0.6);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #666, #999);
+      box-shadow: 0 10px 20px rgba(102, 102, 102, 0.4);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 15px 30px rgba(102, 102, 102, 0.6);
+    }
+
+    .ticket-icon {
+      font-size: 24px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 30px 20px;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="check">✓</div>
+    <h1>Payment Successful!</h1>
+    
+    <!-- Loading Spinner (shown while processing) -->
+    <div id="loadingSpinner" class="loading-spinner"></div>
+    
+    <!-- Status Message -->
+    <p id="statusMessage">Processing your ticket...</p>
+
+    <!-- Ticket Details Section -->
+    <div id="ticketDetails" class="details hidden">
+      <div class="detail-row">
+        <span class="detail-label">🎟️ Ticket Status:</span>
+        <span id="ticketStatus" class="detail-value">Processing</span>
+      </div>
+      
+      <div class="detail-row">
+        <span class="detail-label">📧 Email Status:</span>
+        <span id="emailStatus" class="detail-value">Sending...</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">🏛️ Museum Entry:</span>
+        <span class="detail-value success">Valid</span>
+      </div>
+    </div>
+
+    <!-- Error Details Section (shown if error occurs) -->
+    <div id="errorDetails" class="error-box hidden">
+      <h3>❌ Something went wrong</h3>
+      <p id="errorMessage"></p>
+      <p style="font-size: 12px; color: #999; margin-top: 10px;">Please contact support or try again.</p>
+    </div>
+
+    <!-- Button Group -->
+    <div class="button-group">
+      <a href="index1.html" class="btn" id="homeBtn">🏠 Go to Home</a>
+      <button class="btn btn-secondary" id="retryBtn" onclick="retrySending()">🔄 Retry</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== BACKEND URL - INTEGRATED WITH DEPLOYED LINK =====
+    const BACKEND_URL = 'https://smart-museum-1.onrender.com';
+    
+    // Get session ID from URL
+    const params = new URLSearchParams(window.location.search);
+    const session_id = params.get("session_id");
+    
+    // DOM Elements
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const statusMessage = document.getElementById('statusMessage');
+    const ticketDetails = document.getElementById('ticketDetails');
+    const errorDetails = document.getElementById('errorDetails');
+    const ticketStatus = document.getElementById('ticketStatus');
+    const bookingId = document.getElementById('bookingId');
+    const emailStatus = document.getElementById('emailStatus');
+    const errorMessage = document.getElementById('errorMessage');
+    const retryBtn = document.getElementById('retryBtn');
+    const homeBtn = document.getElementById('homeBtn');
+
+    console.log("🔍 Session ID:", session_id);
+    console.log("Full URL:", window.location.href);
+    console.log("📡 Using Backend URL:", BACKEND_URL);
+
+    // Main function to process payment success
+    async function processPayment(sessionId) {
+      try {
+        // Show loading state
+        loadingSpinner.classList.remove('hidden');
+        ticketDetails.classList.add('hidden');
+        errorDetails.classList.add('hidden');
+        statusMessage.innerText = "Generating your ticket and sending email...";
+        
+        // Call backend API using the deployed URL
+        const response = await fetch(`${BACKEND_URL}/api/payment-success?session_id=${sessionId}`);
+        const data = await response.json();
+        
+        console.log("📦 API Response:", data);
+        
+        // Hide loading spinner
+        loadingSpinner.classList.add('hidden');
+        
+        if (data.success) {
+          // Success state
+          statusMessage.innerText = "✅ Ticket sent successfully!";
+          ticketStatus.innerText = "Confirmed";
+          ticketStatus.className = "detail-value success";
+          emailStatus.innerText = "Sent";
+          emailStatus.className = "detail-value success";
+          
+          if (data.ticketId) {
+            bookingId.innerText = data.ticketId;
+          }
+          
+          ticketDetails.classList.remove('hidden');
+          
+          // Show success message
+          showNotification("Email sent! Check your inbox.", "success");
+          
+        } else {
+          // Error state
+          statusMessage.innerText = "❌ Failed to send ticket email";
+          ticketStatus.innerText = "Failed";
+          ticketStatus.className = "detail-value error";
+          emailStatus.innerText = "Failed";
+          emailStatus.className = "detail-value error";
+          
+          // Show error details
+          if (data.error) {
+            errorMessage.innerText = `Error: ${data.error}`;
+          } else {
+            errorMessage.innerText = "Unknown error occurred";
+          }
+          
+          ticketDetails.classList.remove('hidden');
+          errorDetails.classList.remove('hidden');
+          
+          // Log full error
+          console.error("Error details:", data);
+        }
+        
+      } catch (err) {
+        console.error("❌ Network/Fetch error:", err);
+        
+        // Hide loading spinner
+        loadingSpinner.classList.add('hidden');
+        
+        // Show error state
+        statusMessage.innerText = "❌ Server connection error";
+        ticketStatus.innerText = "Error";
+        ticketStatus.className = "detail-value error";
+        emailStatus.innerText = "Failed";
+        emailStatus.className = "detail-value error";
+        
+        errorMessage.innerText = `Connection error: ${err.message}. Please check if server is running.`;
+        
+        ticketDetails.classList.remove('hidden');
+        errorDetails.classList.remove('hidden');
+      }
+    }
+
+    // Retry function
+    function retrySending() {
+      if (session_id) {
+        processPayment(session_id);
+      } else {
+        alert("No session ID found. Please go back to home.");
+      }
+    }
+
+    // Show notification function
+    function showNotification(message, type) {
+      // You can enhance this with a toast notification
+      console.log(`[${type}] ${message}`);
+    }
+
+    // Check if session_id exists
+    if (session_id) {
+      // Process payment
+      processPayment(session_id);
+      
+      // Optional: Store session_id in localStorage for reference
+      localStorage.setItem('lastPaymentSession', session_id);
+      
+    } else {
+      // No session ID found
+      console.log("❌ No session ID found in URL");
+      
+      loadingSpinner.classList.add('hidden');
+      statusMessage.innerText = "❌ Invalid session - No session ID found";
+      ticketStatus.innerText = "Invalid";
+      ticketStatus.className = "detail-value error";
+      emailStatus.innerText = "N/A";
+      
+      errorMessage.innerText = "No session ID found in URL. Please ensure you came from a valid payment.";
+      
+      ticketDetails.classList.remove('hidden');
+      errorDetails.classList.remove('hidden');
+      
+      // Hide retry button if no session
+      retryBtn.style.display = 'none';
+    }
+
+    // Add beforeunload event to warn user if processing
+    let isProcessing = true;
+    window.addEventListener('beforeunload', function (e) {
+      if (isProcessing && !loadingSpinner.classList.contains('hidden')) {
+        e.preventDefault();
+        e.returnValue = 'Ticket is still being processed. Are you sure you want to leave?';
+      }
+    });
+
+    // Mark as done after 10 seconds (safety)
+    setTimeout(() => {
+      isProcessing = false;
+    }, 10000);
+
+    // Manual retry function (called by button)
+    window.retrySending = retrySending;
+
+    // Debug info
+    console.log("📱 Frontend loaded:", {
+      url: window.location.href,
+      session_id: session_id,
+      backend_url: BACKEND_URL,
+      timestamp: new Date().toISOString()
+    });
+  </script>
+</body>
+</html>

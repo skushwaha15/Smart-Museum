@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Smart Museum Jaipur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ... (all existing CSS remains exactly as you had it) ... */
+        /* I'm keeping all your original styles to avoid any changes */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .city {
+            font-size: 14px;
+            color: #ddd;
+            margin-top: -5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+
+        /* Register Container */
+        .register-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 5%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .register-box {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .register-header {
+            margin-bottom: 40px;
+        }
+
+        .register-header h1 {
+            font-size: 32px;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .register-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .input-with-icon input, .input-with-icon select {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-with-icon input:focus, .input-with-icon select:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+        }
+
+        .phone-input-container {
+            display: flex;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .country-code {
+            background: #f8f9fa;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            font-weight: 500;
+            color: #666;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            min-width: 70px;
+        }
+
+        .phone-input {
+            flex: 1;
+            border-radius: 0 8px 8px 0 !important;
+            padding: 15px !important;
+            border: 2px solid #e0e0e0;
+            border-left: none;
+            height: auto;
+            font-size: 16px;
+        }
+
+        .phone-input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+            border-left: none;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password i {
+            position: static;
+            transform: none;
+        }
+
+        .register-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .register-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .signin-link {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .signin-link a {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signin-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+            display: none;
+            border-left: 4px solid #c62828;
+        }
+
+        .error-message i {
+            margin-right: 8px;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+            display: none;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .success-message i {
+            margin-right: 8px;
+        }
+
+        .password-requirements {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .requirement i {
+            margin-right: 6px;
+            font-size: 12px;
+        }
+
+        .requirement.met {
+            color: #28a745;
+        }
+
+        .requirement.unmet {
+            color: #dc3545;
+        }
+
+        .phone-error {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .password-match {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+         .profile-wrapper {
+    position: relative;
+}
+
+/* Profile Icon */
+.profile-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e9e6e6;
+    color: #202357;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* Dropdown Menu */
+.profile-menu {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 260px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 9999;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: #000;
+}
+
+/* Header */
+.profile-header {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #000;
+}
+
+.profile-header span {
+    font-size: 13px;
+    color: #000;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.profile-header span:hover {
+    opacity: 1;
+}
+
+/* Menu Items */
+.profile-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #000;
+}
+
+.profile-item:hover {
+    background: #f2f2f2;
+}
+
+/* Divider */
+.profile-divider {
+    height: 1px;
+    background: #ddd;
+}
+
+/* Sign out */
+.profile-signout {
+    padding: 17px;
+    text-align: center;
+    color: #000000;
+    font-weight: 600;
+    cursor: pointer;
+    border-top: 1px solid #ddd;
+}
+
+.profile-signout:hover {
+    background: #000;
+    color: #fff;
+}
+
+       
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .auth-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .register-box {
+                padding: 30px 25px;
+                margin: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .register-header h1 {
+                font-size: 28px;
+            }
+
+            .register-box {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">Smart<span>Museum</span></div>
+            <div class="city">Jaipur</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index1.html">Home</a></li>
+            <li><a href="aboutus.html">About Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="auth-buttons" id="authButtons"></div>
+    </nav>
+
+    <!-- Register Container -->
+    <div class="register-container">
+        <div class="register-box">
+            <div class="register-header">
+                <h1><i class="fas fa-user-plus"></i> Register</h1>
+                <p>Create your Smart Museum account</p>
+            </div>
+            
+            <div id="errorMessage" class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">Please fill all required fields correctly</span>
+            </div>
+            
+            <div id="successMessage" class="success-message">
+                <i class="fas fa-check-circle"></i>
+                <span id="successText">Registration successful! Please sign in.</span>
+            </div>
+            
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="username">Full Name *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <div class="phone-input-container">
+                        <span class="country-code">+91</span>
+                        <input type="tel" id="phone" name="phone" class="phone-input" placeholder="Enter 10-digit phone number" maxlength="10" required>
+                    </div>
+                    <div id="phoneError" class="phone-error">
+                        <i class="fas fa-times-circle"></i> Please enter a valid 10-digit phone number
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-venus-mars"></i>
+                        <select id="gender" name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="prefer-not-to-say">Prefer not to say</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-birthday-cake"></i>
+                        <input type="number" id="age" name="age" placeholder="Enter your age" min="1" max="120">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <div class="input-with-icon password-container">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-requirements">
+                        <div class="requirement unmet" id="lengthReq">
+                            <i class="fas fa-times-circle"></i> At least 8 characters
+                        </div>
+                        <div class="requirement unmet" id="uppercaseReq">
+                            <i class="fas fa-times-circle"></i> One uppercase letter
+                        </div>
+                        <div class="requirement unmet" id="lowercaseReq">
+                            <i class="fas fa-times-circle"></i> One lowercase letter
+                        </div>
+                        <div class="requirement unmet" id="numberReq">
+                            <i class="fas fa-times-circle"></i> One number
+                        </div>
+                        <div class="requirement unmet" id="specialReq">
+                            <i class="fas fa-times-circle"></i> One special character
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <div class="input-with-icon password-container">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                    <div id="passwordMatch" class="password-match">
+                        <i class="fas fa-times-circle"></i> Passwords do not match
+                    </div>
+                </div>
+                
+                <button type="submit" class="register-button">Create Account</button>
+                
+                <div class="signin-link">
+                    Already have an account? <a href="signin.html">Sign In</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="aboutus.html">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Smart Museum Blog</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Help & Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Partner With Us</h3>
+                <ul>
+                    <li><a href="#">Museum Partnerships</a></li>
+                    <li><a href="#">Affiliate Program</a></li>
+                    <li><a href="#">Advertise With Us</a></li>
+                    <li><a href="#">Museum API</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Download Our App</h3>
+                <p>Book museums on the go with our mobile app</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Smart Museum, Jaipur. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // BACKEND URL - Integrated with the required deployed link
+        const BACKEND_URL = 'https://smart-museum-1.onrender.com';
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            const authButtons = document.getElementById("authButtons");
+            const user = JSON.parse(localStorage.getItem("currentUser"));
+
+            if (!authButtons) return;
+
+            if (!user) {
+                authButtons.innerHTML = `
+                    <button onclick="window.location.href='signin.html'">Sign In</button>
+                    <button onclick="window.location.href='register.html'">Register</button>
+                `;
+                return;
+            }
+
+            authButtons.innerHTML = `
+                <div class="profile-wrapper">
+                    <div class="profile-icon" onclick="toggleProfileMenu(event)">
+                        ${user.username.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div class="profile-menu" id="profileMenu">
+                        <div class="profile-header">
+                            <h4>Hey, ${user.username}</h4>
+                            <span onclick="goToedit()">Edit Profile ›</span>
+                        </div>
+
+                        <div class="profile-item">🔔 Notifications</div>
+                        <div class="profile-item" onclick="goToContact()">🆘 Help & Support</div>
+
+                        <div class="profile-divider"></div>
+
+                        <div class="profile-signout" onclick="logout()">Sign out</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById("profileMenu");
+            if (menu)
+                menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        document.addEventListener("click", () => {
+            const menu = document.getElementById("profileMenu");
+            if (menu) menu.style.display = "none";
+        });
+
+        function goToContact() {
+            window.location.href = "contact.html";
+        }
+
+        function goToedit() {
+            window.location.href = "edit-profile.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("currentUser");
+            window.location.href = "index1.html";
+        }
+
+        // Debug function to test server connection
+        async function testServerConnection() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/test`);
+                const data = await response.json();
+                console.log('✅ Server connection test:', data);
+                return true;
+            } catch (error) {
+                console.error('❌ Server connection failed:', error);
+                return false;
+            }
+        }
+
+        // Toggle password visibility
+        function setupPasswordToggle(inputId, buttonId) {
+            const toggleButton = document.getElementById(buttonId);
+            const passwordInput = document.getElementById(inputId);
+            
+            if (!toggleButton || !passwordInput) {
+                console.error('Toggle button or password input not found');
+                return;
+            }
+            
+            toggleButton.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                const eyeIcon = this.querySelector('i');
+                if (type === 'text') {
+                    eyeIcon.classList.remove('fa-eye');
+                    eyeIcon.classList.add('fa-eye-slash');
+                } else {
+                    eyeIcon.classList.remove('fa-eye-slash');
+                    eyeIcon.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Setup password toggles
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPasswordToggle('password', 'togglePassword');
+            setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+        });
+
+        // Phone number validation
+        const phoneInput = document.getElementById('phone');
+        const phoneError = document.getElementById('phoneError');
+        
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '');
+                
+                if (this.value.length > 10) {
+                    this.value = this.value.slice(0, 10);
+                }
+                
+                validatePhoneNumber();
+            });
+        }
+        
+        function validatePhoneNumber() {
+            if (!phoneInput) return false;
+            
+            const phoneValue = phoneInput.value;
+            
+            if (phoneValue.length === 10 && /^[6-9]\d{9}$/.test(phoneValue)) {
+                if (phoneError) phoneError.style.display = 'none';
+                return true;
+            } else {
+                if (phoneError) phoneError.style.display = 'block';
+                return false;
+            }
+        }
+
+        // Password validation
+        const passwordInput = document.getElementById('password');
+        
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const value = this.value;
+                
+                // Check length
+                const lengthReq = document.getElementById('lengthReq');
+                if (lengthReq) {
+                    if (value.length >= 8) {
+                        lengthReq.classList.remove('unmet');
+                        lengthReq.classList.add('met');
+                        lengthReq.innerHTML = '<i class="fas fa-check-circle"></i> At least 8 characters';
+                    } else {
+                        lengthReq.classList.remove('met');
+                        lengthReq.classList.add('unmet');
+                        lengthReq.innerHTML = '<i class="fas fa-times-circle"></i> At least 8 characters';
+                    }
+                }
+                
+                // Check uppercase
+                const uppercaseReq = document.getElementById('uppercaseReq');
+                if (uppercaseReq) {
+                    if (/[A-Z]/.test(value)) {
+                        uppercaseReq.classList.remove('unmet');
+                        uppercaseReq.classList.add('met');
+                        uppercaseReq.innerHTML = '<i class="fas fa-check-circle"></i> One uppercase letter';
+                    } else {
+                        uppercaseReq.classList.remove('met');
+                        uppercaseReq.classList.add('unmet');
+                        uppercaseReq.innerHTML = '<i class="fas fa-times-circle"></i> One uppercase letter';
+                    }
+                }
+                
+                // Check lowercase
+                const lowercaseReq = document.getElementById('lowercaseReq');
+                if (lowercaseReq) {
+                    if (/[a-z]/.test(value)) {
+                        lowercaseReq.classList.remove('unmet');
+                        lowercaseReq.classList.add('met');
+                        lowercaseReq.innerHTML = '<i class="fas fa-check-circle"></i> One lowercase letter';
+                    } else {
+                        lowercaseReq.classList.remove('met');
+                        lowercaseReq.classList.add('unmet');
+                        lowercaseReq.innerHTML = '<i class="fas fa-times-circle"></i> One lowercase letter';
+                    }
+                }
+                
+                // Check number
+                const numberReq = document.getElementById('numberReq');
+                if (numberReq) {
+                    if (/[0-9]/.test(value)) {
+                        numberReq.classList.remove('unmet');
+                        numberReq.classList.add('met');
+                        numberReq.innerHTML = '<i class="fas fa-check-circle"></i> One number';
+                    } else {
+                        numberReq.classList.remove('met');
+                        numberReq.classList.add('unmet');
+                        numberReq.innerHTML = '<i class="fas fa-times-circle"></i> One number';
+                    }
+                }
+                
+                // Check special character
+                const specialReq = document.getElementById('specialReq');
+                if (specialReq) {
+                    if (/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+                        specialReq.classList.remove('unmet');
+                        specialReq.classList.add('met');
+                        specialReq.innerHTML = '<i class="fas fa-check-circle"></i> One special character';
+                    } else {
+                        specialReq.classList.remove('met');
+                        specialReq.classList.add('unmet');
+                        specialReq.innerHTML = '<i class="fas fa-times-circle"></i> One special character';
+                    }
+                }
+                
+                // Check if passwords match
+                checkPasswordMatch();
+            });
+        }
+
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const passwordMatch = document.getElementById('passwordMatch');
+        
+        if (confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+        }
+        
+        function checkPasswordMatch() {
+            if (!passwordInput || !confirmPasswordInput || !passwordMatch) return;
+            
+            if (passwordInput.value && confirmPasswordInput.value) {
+                if (passwordInput.value === confirmPasswordInput.value) {
+                    passwordMatch.style.display = 'none';
+                } else {
+                    passwordMatch.style.display = 'block';
+                }
+            } else {
+                passwordMatch.style.display = 'none';
+            }
+        }
+
+        // Form submission - using deployed backend URL
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            console.log('🔄 Form submission started...');
+            
+            const username = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value;
+            const phone_number = document.getElementById('phone').value;
+            const gender = document.getElementById('gender').value;
+            const age = document.getElementById('age').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            console.log('📋 Form data:', { username, email, phone_number, gender, age });
+            
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            
+            // Hide messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Validate phone number
+            if (!validatePhoneNumber()) {
+                errorText.textContent = 'Please enter a valid 10-digit Indian phone number!';
+                errorMessage.style.display = 'block';
+                phoneInput.focus();
+                return;
+            }
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorText.textContent = 'Passwords do not match!';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Check if all password requirements are met
+            const requirements = document.querySelectorAll('.requirement');
+            let allMet = true;
+            
+            requirements.forEach(req => {
+                if (req.classList.contains('unmet')) {
+                    allMet = false;
+                }
+            });
+            
+            if (!allMet) {
+                errorText.textContent = 'Please meet all password requirements!';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            try {
+                console.log(`📤 Sending request to ${BACKEND_URL}/api/register...`);
+                
+                // Using the required backend URL for registration
+                const response = await fetch(`${BACKEND_URL}/api/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        phone_number: phone_number,
+                        gender,
+                        age: age || null,
+                        password
+                    })
+                });
+
+                console.log('📥 Response status:', response.status);
+                
+                const data = await response.json();
+                console.log('📊 Response data:', data);
+
+                if (data.success) {
+                    console.log('✅ Registration successful');
+                    successText.textContent = `Registration successful! Your account has been created. You can now sign in.`;
+                    successMessage.style.display = 'block';
+                    
+                    // Clear form
+                    this.reset();
+                    
+                    // Reset requirement indicators
+                    requirements.forEach(req => {
+                        req.classList.remove('met');
+                        req.classList.add('unmet');
+                        const icon = req.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('fa-check-circle');
+                            icon.classList.add('fa-times-circle');
+                        }
+                    });
+                    
+                    // Redirect to sign in page after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = 'signin.html?registered=true';
+                    }, 3000);
+                } else {
+                    console.log('❌ Registration failed:', data.message);
+                    errorText.textContent = data.message || 'Registration failed. Please try again.';
+                    errorMessage.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('❌ Network error:', error);
+                errorText.textContent = 'Network error! Unable to connect to the server. Please check your internet connection.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Test server connection on page load
+        window.addEventListener('load', function() {
+            testServerConnection();
+        });
+    </script>
+</body>
+</html>

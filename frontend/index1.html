@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Museum - Jaipur</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma;}
+body{background:#f5f5f5;color:#333}
+
+
+        /* Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .city {
+            font-size: 14px;
+            color: #ddd;
+            margin-top: -5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+
+        /* Search Bar */
+        .search-container {
+            background-color: #16213e;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar {
+            display: flex;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Slideshow */
+        .slideshow-container {
+            position: relative;
+            height: 400px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 30px;
+        }
+
+        .slide-content h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .slide-content p {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        /* Slide dots */
+        .slide-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            height: 12px;
+            width: 12px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dot.active {
+            background-color: #e94560;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 40px 5% 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e94560;
+        }
+
+        .section-header h2 {
+            font-size: 24px;
+            color: #1a1a2e;
+        }
+
+        .view-all {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Museum Cards Container */
+        .museums-section {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .museums-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px 5%;
+            gap: 20px;
+            scrollbar-width: thin;
+            scroll-behavior: smooth;
+        }
+
+        .museum-card {
+            min-width: 250px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .museum-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .museum-img {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .museum-info {
+            padding: 15px;
+        }
+
+        .museum-info h3 {
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .museum-info p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .rating {
+            color: #ffc107;
+            margin-bottom: 10px;
+        }
+
+        .book-btn {
+            background-color: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        /* Navigation Arrows - Fixed Position */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(233, 69, 96, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-arrow:hover {
+            background-color: #e94560;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-arrow.left {
+            left: 20px;
+        }
+
+        .nav-arrow.right {
+            right: 20px;
+        }
+
+        /* Events Section */
+        .events-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 10px 5%;
+        }
+
+        .event-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-img {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .event-info {
+            padding: 15px;
+        }
+
+        .event-date {
+            color: #e94560;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .event-info h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .event-info p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+            }
+
+            .search-bar {
+                width: 95%;
+            }
+
+            .slideshow-container {
+                height: 300px;
+            }
+
+            .slide-content h2 {
+                font-size: 22px;
+            }
+
+            .section-header {
+                margin: 30px 5% 15px;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .auth-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .nav-arrow {
+                display: none;
+            }
+        }
+        #chatbot {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* Button styling */
+#chat-btn {
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+}
+
+/* Chat container hidden by default */
+#chat-container {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    width: 320px;
+    height: 450px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+}
+.profile-wrapper {
+    position: relative;
+}
+
+/* Profile Icon */
+.profile-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e9e6e6;
+    color: #202357;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* Dropdown Menu */
+.profile-menu {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 260px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 9999;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: #000;
+}
+
+/* Header */
+.profile-header {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #000;
+}
+
+.profile-header span {
+    font-size: 13px;
+    color: #000;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.profile-header span:hover {
+    opacity: 1;
+}
+
+/* Menu Items */
+.profile-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #000;
+}
+
+.profile-item:hover {
+    background: #f2f2f2;
+}
+
+/* Divider */
+.profile-divider {
+    height: 1px;
+    background: #ddd;
+}
+
+/* Sign out */
+.profile-signout {
+    padding: 17px;
+    text-align: center;
+    color: #000000;
+    font-weight: 600;
+    cursor: pointer;
+    border-top: 1px solid #ddd;
+}
+
+.profile-signout:hover {
+    background: #000;
+    color: #fff;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* City button */
+.city-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+   white-space: nowrap; 
+}
+
+.city-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.arrow {
+  font-size: 12px;
+}
+
+/* Dropdown */
+.city-selector {
+  position: relative;
+}
+
+.city-dropdown {
+  display: none;
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: white;
+  color: black;
+  width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+
+.city-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.city-item img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.city-item:hover {
+  background: #f5f5f5;
+}
+
+.city-btn {
+  padding: 6px 10px;
+  border-radius: 20px;
+}
+
+.city-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+
+
+
+
+/* Iframe full size inside container */
+#chatbotFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ================= CATEGORY SECTIONS ================= */
+.category-block{
+  margin:40px 5%;
+}
+
+.section-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #e94560;
+  padding-bottom:8px;
+  margin-bottom:20px;
+}
+
+.section-header h2{
+  font-size:22px;
+  color:#1a1a2e;
+}
+
+.view-all{
+  color:#e94560;
+  font-weight:600;
+  text-decoration:none;
+}
+
+/* ================= GRID ================= */
+.museums-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;
+}
+
+/* ================= CARD ================= */
+.museum-card{
+  background:white;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  transition:transform 0.3s;
+  cursor:pointer;
+}
+
+.museum-card:hover{
+  transform:translateY(-6px);
+}
+
+.museum-img{
+  height:180px;
+  background-size:cover;
+  background-position:center;
+}
+
+.museum-info{
+  padding:14px;
+}
+
+.museum-info h3{
+  font-size:17px;
+  margin-bottom:4px;
+}
+
+.museum-location{
+  font-size:13px;
+  color:#666;
+}
+
+.museum-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:10px 0;
+  font-size:13px;
+}
+
+.price-badge{
+  background:#e94560;
+  color:white;
+  padding:4px 10px;
+  border-radius:8px;
+  font-size:13px;
+}
+
+.book-btn{
+  width:100%;
+  padding:8px;
+  border:none;
+  background:#1a1a2e;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">Smart<span>Museum</span></div>
+            <div class="city">Jaipur</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index1.html">Home</a></li>
+            <li><a href="aboutus.html">About Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+<div class="nav-right">
+
+  <!-- CITY SELECTOR -->
+  <div class="city-selector">
+    <button class="city-btn" id="cityBtn">
+      <img src="https://icons.iconarchive.com/icons/treetog/junior/256/earth-icon.png" class="city-icon">
+     <span id="selectedCity">All Cities</span>
+
+      <span class="arrow">▾</span>
+    </button>
+
+    <div class="city-dropdown" id="cityDropdown">
+         <div class="city-item" onclick="selectCity('ALL')">
+    🌍 All Cities
+  </div>
+
+      <div class="city-item" onclick="selectCity('Jaipur')">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTY_pihfVypu1D60wI6NYhv-s8y2xboyesrVQ&s"> Jaipur
+      </div>
+      <div class="city-item" onclick="selectCity('Udaipur')">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBB0QilM1fRX9nYJkb5EfmFNLpsi0kK0WcBw&s"> Udaipur
+      </div>
+      <div class="city-item" onclick="selectCity('Jaisalmer')">
+        <img src="https://thumbs.dreamstime.com/b/animation-landscape-ancient-indian-palace-river-bank-animation-landscape-ancient-indian-palace-river-bank-125354615.jpg"> Jaisalmer
+      </div>
+      <div class="city-item" onclick="selectCity('Jodhpur')">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQRdRbGvvzQKor5Rl0fgNJGhsvas7cj5R2cg&s"> Jodhpur
+      </div>
+      <div class="city-item" onclick="selectCity('Bikaner')">
+        <img src="https://i.pinimg.com/originals/09/3f/a7/093fa760e7529385866e385ef548f6bb.jpg"> Bikaner
+      </div>
+      <div class="city-item" onclick="selectCity('Kota')">
+        <img src="https://thumbs.dreamstime.com/b/colorful-landscape-city-center-lots-buildings-view-full-attractive-downtown-269982620.jpg"> Kota
+      </div>
+      <div class="city-item" onclick="selectCity('Ajmer')">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4SfFbVNI0qTMOELYjnPjuZV1VQzU-hd85fg&s"> Ajmer
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-buttons" id="authButtons">
+</div>
+
+</div>
+
+      
+
+
+    </nav>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-bar">
+            <input type="text" id="museumSearch" placeholder="Search for museums, exhibitions, or events...">
+            <button id="searchBtn"><i class="fas fa-search"></i></button>
+
+        </div>
+    </div>
+
+    <!-- Slideshow -->
+    <div class="slideshow-container">
+        <div class="slide active" style="background-image: url('https://content-tourist.rajasthan.gov.in/uploads/albert_hall_museum_jaipur_entry_fee_timings_holidays_reviews_header_219f4b832f.jpg');">
+            <div class="slide-content">
+                <h2>Albert Hall Museum</h2>
+                <p>Jaipur's oldest museum showcasing exquisite artifacts, carpets, and metal sculptures</p>
+            </div>
+        </div>
+        <div class="slide" style="background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Jaipur_03-2016_22_City_Palace_complex.jpg/960px-Jaipur_03-2016_22_City_Palace_complex.jpg);">
+            <div class="slide-content">
+                <h2>City Palace Museum</h2>
+                <p>Explore the royal heritage of Jaipur with magnificent palaces and galleries</p>
+            </div>
+        </div>
+        <div class="slide" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Rajasthan-Jaipur-Jaigarh-Fort-compound-Apr-2004-00.JPG/1200px-Rajasthan-Jaipur-Jaigarh-Fort-compound-Apr-2004-00.JPG');">
+            <div class="slide-content">
+                <h2>Jaigarh Fort Museum</h2>
+                <p>Home to the world's largest cannon on wheels and royal armory collections</p>
+            </div>
+        </div>
+        <div class="slide" style="background-image: url('https://moderneccentrics.wordpress.com/wp-content/uploads/2023/03/dsc7330.jpg');">
+            <div class="slide-content">
+                <h2>Amer Fort Palace Museum</h2>
+                <p>Discover the artistic marvels and royal history of the Kachwaha dynasty</p>
+            </div>
+        </div>
+        
+        <!-- Slide dots -->
+        <div class="slide-dots">
+            <div class="dot active" data-slide="0"></div>
+            <div class="dot" data-slide="1"></div>
+            <div class="dot" data-slide="2"></div>
+            <div class="dot" data-slide="3"></div>
+        </div>
+    </div>
+
+   <!-- ================= CATEGORY SECTIONS ================= -->
+
+<section class="category-block">
+  <div class="section-header">
+    <h2>🏰 Royal & Palace Museums</h2>
+  </div>
+
+  <div class="museums-section">
+    <button class="nav-arrow left"
+      onclick="scrollMuseums('left','royalSlider')">‹</button>
+
+    <div class="museums-container" id="royalSlider"></div>
+
+    <button class="nav-arrow right"
+      onclick="scrollMuseums('right','royalSlider')">›</button>
+  </div>
+</section>
+
+
+<section class="category-block">
+  <div class="section-header">
+    <h2>⚔ War & Weapons Museums</h2>
+  </div>
+
+  <div class="museums-section">
+    <button class="nav-arrow left"
+      onclick="scrollMuseums('left','warSlider')">‹</button>
+
+    <div class="museums-container" id="warSlider"></div>
+
+    <button class="nav-arrow right"
+      onclick="scrollMuseums('right','warSlider')">›</button>
+  </div>
+</section>
+
+
+<section class="category-block">
+  <div class="section-header">
+    <h2>🎨 Art & Culture Museums</h2>
+  </div>
+
+  <div class="museums-section">
+    <button class="nav-arrow left"
+      onclick="scrollMuseums('left','artSlider')">‹</button>
+
+    <div class="museums-container" id="artSlider"></div>
+
+    <button class="nav-arrow right"
+      onclick="scrollMuseums('right','artSlider')">›</button>
+  </div>
+</section>
+
+
+<section class="category-block">
+  <div class="section-header">
+    <h2>💎 Jewellery & Craft Museums</h2>
+  </div>
+
+  <div class="museums-section">
+    <button class="nav-arrow left"
+      onclick="scrollMuseums('left','craftSlider')">‹</button>
+
+    <div class="museums-container" id="craftSlider"></div>
+
+    <button class="nav-arrow right"
+      onclick="scrollMuseums('right','craftSlider')">›</button>
+  </div>
+</section>
+
+
+<section class="category-block">
+  <div class="section-header">
+    <h2>🏛 Archaeology & Heritage Museums</h2>
+  </div>
+
+  <div class="museums-section">
+    <button class="nav-arrow left"
+      onclick="scrollMuseums('left','heritageSlider')">‹</button>
+
+    <div class="museums-container" id="heritageSlider"></div>
+
+    <button class="nav-arrow right"
+      onclick="scrollMuseums('right','heritageSlider')">›</button>
+  </div>
+</section>
+
+
+    <!-- Events and Shows -->
+    <div class="section-header">
+        <h2>Events and Shows</h2>
+        
+    </div>
+    <div class="events-container">
+        <div class="event-card">
+            <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1595675028930-8c50c300a28a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80');"></div>
+            <div class="event-info">
+                <div class="event-date">June 15-30, 2023</div>
+                <h3>Night Museum Tour</h3>
+                <p>Special evening tours of Albert Hall Museum with light and sound show</p>
+                <button class="book-btn">Book Now</button>
+            </div>
+        </div>
+        <div class="event-card">
+            <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1594736797933-d0f289d3d0e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80');"></div>
+            <div class="event-info">
+                <div class="event-date">July 5, 2023</div>
+                <h3>Royal Heritage Walk</h3>
+                <p>Guided tour through City Palace with royal family history</p>
+                <button class="book-btn">Book Now</button>
+            </div>
+        </div>
+        <div class="event-card">
+            <div class="event-img" style="background-image: url('https://images.unsplash.com/photo-1595675028930-8c50c300a28a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80');"></div>
+            <div class="event-info">
+                <div class="event-date">July 12-14, 2023</div>
+                <h3>Astronomy Workshop</h3>
+                <p>Learn about ancient astronomical instruments at Jantar Mantar</p>
+                <button class="book-btn">Book Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="aboutus.html">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Smart Museum Blog</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Help & Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Partner With Us</h3>
+                <ul>
+                    <li><a href="#">Museum Partnerships</a></li>
+                    <li><a href="#">Affiliate Program</a></li>
+                    <li><a href="#">Advertise With Us</a></li>
+                    <li><a href="#">Museum API</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Download Our App</h3>
+                <p>Book museums on the go with our mobile app</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Smart Museum, Jaipur. All rights reserved.
+        </div>
+    </footer>
+<!-- Chatbot button -->
+<div id="chatbot">
+    <button id="chat-btn">💬</button>
+    <div id="chat-container">
+        <iframe src="https://chatbot-bay-mu-78.vercel.app/" id="chatbotFrame"></iframe>
+    </div>
+</div>
+
+
+
+
+<script>
+/* ===== BACKEND URL - INTEGRATED WITH DEPLOYED LINK ===== */
+const BACKEND_URL = 'https://smart-museum-1.onrender.com'
+;
+
+/* ================= AUTH / PROFILE ================= */
+document.addEventListener("DOMContentLoaded", () => {
+    const authButtons = document.getElementById("authButtons");
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!authButtons) return;
+
+    if (user) {
+        authButtons.innerHTML = `
+            <div class="profile-wrapper">
+                <div class="profile-icon" onclick="toggleProfileMenu(event)">
+                    ${user.username.charAt(0).toUpperCase()}
+                </div>
+                <div class="profile-menu" id="profileMenu">
+                    <div class="profile-header">
+                        <h4>Hey, ${user.username}</h4>
+                        <span onclick="goToEdit()">Edit Profile ›</span>
+                    </div>
+                    <div class="profile-item">🔔 Notifications</div>
+                    <div class="profile-item" onclick="goToContact()">🆘 Help & Support</div>
+             <div class="profile-item" onclick="goToHistory()">📜 History</div>
+
+                    <div class="profile-divider"></div>
+                    <div class="profile-signout" onclick="logout()">Sign out</div>
+                </div>
+            </div>
+        `;
+    } else {
+        authButtons.innerHTML = `
+            <button onclick="location.href='signin.html'">Sign In</button>
+            <button onclick="location.href='register.html'">Register</button>
+        `;
+    }
+});
+const cityIcon = document.querySelector(".city-icon");
+
+let city = "ALL";
+const cityIcons = {
+  ALL: "https://icons.iconarchive.com/icons/treetog/junior/256/earth-icon.png",
+  Jaipur: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTY_pihfVypu1D60wI6NYhv-s8y2xboyesrVQ&s",
+  Udaipur: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBB0QilM1fRX9nYJkb5EfmFNLpsi0kK0WcBw&s",
+  Jaisalmer: "https://thumbs.dreamstime.com/b/animation-landscape-ancient-indian-palace-river-bank-animation-landscape-ancient-indian-palace-river-bank-125354615.jpg",
+  Jodhpur: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQRdRbGvvzQKor5Rl0fgNJGhsvas7cj5R2cg&s",
+  Bikaner: "https://i.pinimg.com/originals/09/3f/a7/093fa760e7529385866e385ef548f6bb.jpg",
+  Kota: "https://thumbs.dreamstime.com/b/colorful-landscape-city-center-lots-buildings-view-full-attractive-downtown-269982620.jpg",
+  Ajmer: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4SfFbVNI0qTMOELYjnPjuZV1VQzU-hd85fg&s"
+};
+
+const cityBtn = document.getElementById("cityBtn");
+const dropdown = document.getElementById("cityDropdown");
+const selectedCity = document.getElementById("selectedCity");
+
+// Toggle dropdown
+cityBtn.addEventListener("click", () => {
+  dropdown.style.display =
+    dropdown.style.display === "block" ? "none" : "block";
+});
+function selectCity(selected) {
+  city = selected;
+
+  selectedCity.innerText =
+    selected === "ALL" ? "All Cities" : selected;
+
+  // ✅ ICON CHANGE
+if (selected === "ALL") {
+  cityIcon.src = cityIcons.ALL;
+} else {
+  cityIcon.src = cityIcons[selected];
+}
+
+
+  dropdown.style.display = "none";
+  loadHomeCategories();
+
+}
+
+
+// Close on outside click
+window.addEventListener("click", function(e) {
+  if (!cityBtn.contains(e.target)) {
+    dropdown.style.display = "none";
+  }
+});
+
+/* Toggle profile menu */
+function toggleProfileMenu(event) {
+    event.stopPropagation();
+    const menu = document.getElementById("profileMenu");
+    if (!menu) return;
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+/* Close menu on outside click */
+document.addEventListener("click", () => {
+    const menu = document.getElementById("profileMenu");
+    if (menu) menu.style.display = "none";
+});
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    window.location.href = "index1.html";
+}
+
+function goToContact() {
+    window.location.href = "contact.html";
+}
+
+function goToEdit() {
+    window.location.href = "edit-profile.html";
+}
+function goToHistory() {
+    window.location.href = "history.html";
+}
+
+/* ================= SLIDESHOW ================= */
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelectorAll('.dot');
+
+function showSlide(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+
+    currentSlide = (n + slides.length) % slides.length;
+    slides[currentSlide].classList.add('active');
+    dots[currentSlide].classList.add('active');
+}
+
+dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => showSlide(i));
+});
+
+setInterval(() => showSlide(currentSlide + 1), 5000);
+showSlide(0);
+
+/* ================= MUSEUM SCROLL ================= */
+function scrollMuseums(direction, containerId) {
+    const container = document.getElementById(containerId);
+    container.scrollLeft += direction === 'left' ? -300 : 300;
+}
+
+function goToMuseum(id) {
+    window.location.href = `index2.html?id=${id}`;
+}
+
+/* ================= IMAGE FALLBACK ================= */
+document.addEventListener('DOMContentLoaded', () => {
+    const images = document.querySelectorAll('.slide, .museum-img, .event-img');
+
+    images.forEach(img => {
+        const src = img.style.backgroundImage.replace(/url\(["']?|["']?\)/g, '');
+        const testImg = new Image();
+        testImg.onerror = () => {
+            img.style.backgroundImage =
+            'url("https://images.unsplash.com/photo-1595675028930-8c50c300a28a?auto=format&fit=crop&w=600&q=80")';
+        };
+        testImg.src = src;
+    });
+});
+
+/* ================= SEARCH ================= */
+const searchInput = document.getElementById('museumSearch');
+const searchBtn = document.getElementById('searchBtn');
+
+searchBtn.addEventListener('click', () => {
+    const query = searchInput.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.museum-card');
+
+    if (!query) {
+        cards.forEach(c => c.style.display = 'block');
+        return;
+    }
+
+    let found = false;
+    cards.forEach(card => {
+        const title = card.querySelector('h3').innerText.toLowerCase();
+        if (title.includes(query)) {
+            card.style.display = 'block';
+            card.scrollIntoView({ behavior: "smooth", block: "center" });
+            found = true;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    if (!found) alert("No museum found!");
+});
+
+searchInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') searchBtn.click();
+});
+
+/* ================= CHATBOT ================= */
+document.getElementById('chat-btn').addEventListener('click', () => {
+    const chat = document.getElementById('chat-container');
+    chat.style.display = chat.style.display === 'block' ? 'none' : 'block';
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  city = "ALL";
+  selectedCity.innerText = "All Cities";
+  cityIcon.src = cityIcons.ALL;   // 🔥 IMPORTANT LINE
+  loadHomeCategories();
+
+});
+
+
+/*async function loadMuseums() {
+    try {
+        const res = await fetch(`http://localhost:5000/api/museums?city=${city}`);
+
+        const museums = await res.json();
+
+        const recommended = document.getElementById("recommendedMuseums");
+        const popular = document.getElementById("popularMuseums");
+
+        recommended.innerHTML = "";
+        popular.innerHTML = "";
+
+        museums.forEach((m, i) => {
+            const card = `
+                <div class="museum-card" onclick="goToMuseum(${m.id})">
+                    <div class="museum-img"
+                         style="background-image:url('${m.main_image}')">
+                    </div>
+                    <div class="museum-info">
+                        <h3>${m.name}</h3>
+                        <p>${m.description.substring(0, 80)}...</p>
+                    </div>
+                </div>
+            `;
+
+            if (i < 4) {
+                recommended.insertAdjacentHTML("beforeend", card);
+            } else {
+                popular.insertAdjacentHTML("beforeend", card);
+            }
+        });
+
+    } catch (err) {
+        console.error("Museum load error:", err);
+        alert("Museums load nahi ho rahe — backend check karo");
+    }
+}*/
+async function loadByCategory(category) {
+    // 🔥 hide sliders when category selected
+const sliders = document.querySelectorAll(".museums-section");
+sliders.forEach(s => s.style.display = "none");
+
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/api/museums?category=${encodeURIComponent(category)}&city=${city}`
+    );
+
+    const museums = await res.json();
+
+    const grid = document.getElementById("museumGrid");
+    grid.innerHTML = "";
+
+    if (museums.length === 0) {
+      grid.innerHTML = "<p>No museums found.</p>";
+      return;
+    }
+
+    museums.forEach(m => {
+      const card = `
+        <div class="museum-card">
+          <div class="museum-img"
+            style="background-image:url('${m.main_image}')">
+          </div>
+
+          <div class="museum-info">
+            <h3>${m.name}</h3>
+            <p>${m.description.substring(0, 80)}...</p>
+
+            <button class="book-btn"
+              onclick="goToMuseum(${m.id})">
+              View Details
+            </button>
+          </div>
+        </div>
+      `;
+      grid.insertAdjacentHTML("beforeend", card);
+    });
+
+    // auto scroll to category result
+    grid.scrollIntoView({ behavior: "smooth" });
+
+  } catch (err) {
+    console.error("Category load error:", err);
+    alert("Category load nahi ho rahi — backend check karo");
+  }
+}
+/* ================= HOME CATEGORY LOADER ================= */
+async function loadHomeCategories() {
+  const categoryMap = {
+    "Royal & Palace Museums": "royalSlider",
+    "War & Weapons Museums": "warSlider",
+    "Art & Culture Museums": "artSlider",
+    "Jewellery & Craft Museums": "craftSlider",
+    "Archaeology & Heritage Museums": "heritageSlider"
+  };
+
+  for (const category in categoryMap) {
+    try {
+      const res = await fetch(
+        `${BACKEND_URL}/api/museums?category=${encodeURIComponent(category)}&city=${city}`
+      );
+      const museums = await res.json();
+
+      const container = document.getElementById(categoryMap[category]);
+      if (!container) continue;
+
+      container.innerHTML = "";
+
+      museums.forEach(m => {
+  container.insertAdjacentHTML("beforeend", `
+    <div class="museum-card" onclick="goToMuseum(${m.id})">
+      
+      <div class="museum-img"
+        style="background-image:url('${m.main_image}')">
+      </div>
+
+      <div class="museum-info">
+        <h3>${m.name}</h3>
+
+        <!-- City from DB -->
+        <p class="museum-location">
+          📍 ${m.city}
+        </p>
+
+        <!-- View Details button (AS IT IS) -->
+        <button class="book-btn">
+          View Details
+        </button>
+      </div>
+
+    </div>
+  `);
+});
+
+
+
+    } catch (err) {
+      console.error("Slider load error:", err);
+    }
+  }
+}
+
+
+</script>
+
+</body>
+</html>

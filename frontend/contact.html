@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact Us - Smart Museum </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+
+        /* ================= CONTACT SECTION ================= */
+        .contact-section {
+            padding: 60px 5%;
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            color: white;
+            min-height: calc(100vh - 140px);
+        }
+
+        .contact-container {
+            max-width: 1100px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .contact-info h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #e94560;
+        }
+
+        .contact-info p {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #ddd;
+        }
+
+        .info-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .info-box i {
+            font-size: 22px;
+            color: #e94560;
+            margin-right: 15px;
+        }
+
+        /* ================= FORM ================= */
+        .contact-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            color: #333;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+
+        .contact-form h3 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #1a1a2e;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+            font-size: 15px;
+        }
+
+        .form-group textarea {
+            resize: none;
+            height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: #e94560;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #d63447;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .auth-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .about-hero h1 {
+                font-size: 36px;
+            }
+
+            .about-hero p {
+                font-size: 18px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .mission-vision {
+                grid-template-columns: 1fr;
+            }
+
+            .mission, .vision {
+                padding: 30px 20px;
+            }
+        }
+        
+        .profile-wrapper {
+    position: relative;
+}
+
+/* Profile Icon */
+.profile-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e9e6e6;
+    color: #202357;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* Dropdown Menu */
+.profile-menu {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 260px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 9999;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: #000;
+}
+
+/* Header */
+.profile-header {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #000;
+}
+
+.profile-header span {
+    font-size: 13px;
+    color: #000;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.profile-header span:hover {
+    opacity: 1;
+}
+
+/* Menu Items */
+.profile-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #000;
+}
+
+.profile-item:hover {
+    background: #f2f2f2;
+}
+
+/* Divider */
+.profile-divider {
+    height: 1px;
+    background: #ddd;
+}
+
+/* Sign out */
+.profile-signout {
+    padding: 17px;
+    text-align: center;
+    color: #000000;
+    font-weight: 600;
+    cursor: pointer;
+    border-top: 1px solid #ddd;
+}
+
+.profile-signout:hover {
+    background: #000;
+    color: #fff;
+}
+
+    </style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+ <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">Smart<span>Museum</span></div>
+            
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="aboutus.html">About Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+       <div class="auth-buttons" id="authButtons"></div>
+
+    </nav>
+<!-- ================= CONTACT ================= -->
+ 
+<section class="contact-section">
+    <div class="contact-container">
+
+        <div class="contact-info">
+            <h2>Contact Us</h2>
+            <p>
+                Have questions regarding museum tickets, events, or partnerships?
+                Our team at Smart Museum  is happy to help you.
+            </p>
+
+            <div class="info-box">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Smart Museum, , Rajasthan</span>
+            </div>
+
+            <div class="info-box">
+                <i class="fas fa-envelope"></i>
+                <span>smartmuseum3@gmail.com</span>
+            </div>
+
+            
+        </div>
+<div class="contact-form">
+  <h3>Send Us a Message</h3>
+  <form id="contactForm">
+      <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" name="from_name" placeholder="Enter your name" required>
+      </div>
+
+      <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="from_email" placeholder="Enter your email" required>
+      </div>
+
+      <div class="form-group">
+          <label>Message</label>
+          <textarea name="message" placeholder="Write your message..." required></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">Submit</button>
+  </form>
+</div>
+
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+emailjs.init("updovbDhKMQBfGv66"); // Public key
+
+document.getElementById("contactForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    // 1️⃣ Email to Museum (Admin)
+    emailjs.sendForm(
+        "service_tmfuvo8",
+        "template_hscpnr5", // 👈 admin template
+        this
+    );
+
+    // 2️⃣ Auto-reply Email to User
+    emailjs.sendForm(
+        "service_tmfuvo8",
+        "template_04qjeen", // 👈 auto reply template
+        this
+    )
+    .then(function(){
+        alert("✅ Message sent successfully! We will contact you soon.");
+        document.getElementById("contactForm").reset();
+    })
+    .catch(function(error){
+        console.error("EmailJS Error:", error);
+        alert("❌ Something went wrong");
+    });
+});
+</script>
+
+
+
+
+
+
+<!-- ================= FOOTER ================= -->
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="aboutus.html">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Smart Museum Blog</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Help & Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Partner With Us</h3>
+                <ul>
+                    <li><a href="#">Museum Partnerships</a></li>
+                    <li><a href="#">Affiliate Program</a></li>
+                    <li><a href="#">Advertise With Us</a></li>
+                    <li><a href="#">Museum API</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Download Our App</h3>
+                <p>Book museums on the go with our mobile app</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Smart Museum . All rights reserved.
+        </div>
+    </footer>
+<!-- ================= LOGIN STATE SCRIPT ================= -->
+<script>
+   
+
+document.addEventListener("DOMContentLoaded", () => {
+    const authButtons = document.getElementById("authButtons");
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!authButtons) return;
+
+    if (!user) {
+        authButtons.innerHTML = `
+            <button onclick="window.location.href='signin.html'">Sign In</button>
+            <button onclick="window.location.href='register.html'">Register</button>
+        `;
+        return;
+    }
+
+    authButtons.innerHTML = `
+        <div class="profile-wrapper">
+            <div class="profile-icon" onclick="toggleProfileMenu(event)">
+                ${user.username.charAt(0).toUpperCase()}
+            </div>
+
+            <div class="profile-menu" id="profileMenu">
+                <div class="profile-header">
+                    <h4>Hey, ${user.username}</h4>
+                    <span onclick="goToedit()">Edit Profile ›</span>
+                </div>
+
+                <div class="profile-item">🔔 Notifications</div>
+                <div class="profile-item" onclick="goToContact()">🆘 Help & Support</div>
+                <div class="profile-item" onclick="goToHistory()">📜 History</div>
+
+                <div class="profile-divider"></div>
+
+                <div class="profile-signout" onclick="logout()">Sign out</div>
+            </div>
+        </div>
+    `;
+});
+
+function toggleProfileMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById("profileMenu");
+    if (menu)
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+document.addEventListener("click", () => {
+    const menu = document.getElementById("profileMenu");
+    if (menu) menu.style.display = "none";
+});
+
+function goToContact() {
+    window.location.href = "contact.html";
+}
+
+function goToedit() {
+    window.location.href = "edit-profile.html";
+}
+function goToHistory() {
+    window.location.href = "history.html";
+}
+
+function logout() {
+    localStorage.removeItem("currentUser");
+    window.location.href = "index.html";
+}
+
+
+
+</script>
+
+
+</body>
+</html>

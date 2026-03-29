@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Smart Museum Jaipur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a2e;
+            padding: 15px 5%;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e94560;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .city {
+            font-size: 14px;
+            color: #ddd;
+            margin-top: -5px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin: 0 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #e94560;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-buttons button {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #d63447;
+        }
+
+        /* Sign In Container */
+        .signin-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 5%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .signin-box {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .signin-header {
+            margin-bottom: 40px;
+        }
+
+        .signin-header h1 {
+            font-size: 32px;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .signin-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .input-with-icon input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-with-icon input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.1);
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .forgot-password {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .signin-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .signin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.3);
+        }
+
+        .signup-link {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .signup-link a {
+            color: #e94560;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+            display: none;
+            border-left: 4px solid #c62828;
+        }
+
+        .error-message i {
+            margin-right: 8px;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+            display: none;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .success-message i {
+            margin-right: 8px;
+        }
+        
+        .profile-wrapper {
+            position: relative;
+        }
+
+        .profile-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #e9e6e6;
+            color: #202357;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 260px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 9999;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: #000;
+        }
+
+        .profile-header {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .profile-header h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #000;
+        }
+
+        .profile-header span {
+            font-size: 13px;
+            color: #000;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .profile-header span:hover {
+            opacity: 1;
+        }
+
+        .profile-item {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            color: #000;
+        }
+
+        .profile-item:hover {
+            background: #f2f2f2;
+        }
+
+        .profile-divider {
+            height: 1px;
+            background: #ddd;
+        }
+
+        .profile-signout {
+            padding: 17px;
+            text-align: center;
+            color: #000000;
+            font-weight: 600;
+            cursor: pointer;
+            border-top: 1px solid #ddd;
+        }
+
+        .profile-signout:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 40px 5% 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #e94560;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #e94560;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #e94560;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .nav-links {
+                margin: 15px 0;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .auth-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .signin-box {
+                padding: 30px 25px;
+                margin: 0 20px;
+            }
+
+            .remember-forgot {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .signin-header h1 {
+                font-size: 28px;
+            }
+
+            .signin-box {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">Smart<span>Museum</span></div>
+            <div class="city">Jaipur</div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index1.html">Home</a></li>
+            <li><a href="aboutus.html">About Us</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="auth-buttons" id="authButtons"></div>
+    </nav>
+
+    <!-- Sign In Container -->
+    <div class="signin-container">
+        <div class="signin-box">
+            <div class="signin-header">
+                <h1><i class="fas fa-user-lock"></i> Sign In</h1>
+                <p>Access your Smart Museum account</p>
+            </div>
+            
+            <div id="errorMessage" class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">Incorrect username or password</span>
+            </div>
+            
+            <div id="successMessage" class="success-message">
+                <i class="fas fa-check-circle"></i>
+                <span id="successText">Registration successful! Please sign in.</span>
+            </div>
+            
+            <form id="signin-form">
+                <div class="form-group">
+                    <label for="username">Username (Your Full Name)</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Enter your full name as username" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon password-container">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="far fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="remember-forgot">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="forgot.html" class="forgot-password">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="signin-button">Sign In</button>
+                
+                <div class="signup-link">
+                    Don't have an account? <a href="register.html">Register now</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="aboutus.html">About Us</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Smart Museum Blog</a></li>
+                    <li><a href="#">Corporate Information</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Help & Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Partner With Us</h3>
+                <ul>
+                    <li><a href="#">Museum Partnerships</a></li>
+                    <li><a href="#">Affiliate Program</a></li>
+                    <li><a href="#">Advertise With Us</a></li>
+                    <li><a href="#">Museum API</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Download Our App</h3>
+                <p>Book museums on the go with our mobile app</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 Smart Museum, Jaipur. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+    // Navbar profile setup - handles user session display
+    document.addEventListener("DOMContentLoaded", () => {
+        const authButtons = document.getElementById("authButtons");
+        const user = JSON.parse(localStorage.getItem("currentUser"));
+
+        if (!authButtons) return;
+
+        if (!user) {
+            authButtons.innerHTML = `
+                <button onclick="window.location.href='signin.html'">Sign In</button>
+                <button onclick="window.location.href='register.html'">Register</button>
+            `;
+            return;
+        }
+
+        authButtons.innerHTML = `
+            <div class="profile-wrapper">
+                <div class="profile-icon" onclick="toggleProfileMenu(event)">
+                    ${user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div class="profile-menu" id="profileMenu">
+                    <div class="profile-header">
+                        <h4>Hey, ${user.username || 'User'}</h4>
+                        <span onclick="goToedit()">Edit Profile ›</span>
+                    </div>
+                    <div class="profile-item">🔔 Notifications</div>
+                    <div class="profile-item" onclick="goToContact()">🆘 Help & Support</div>
+                    <div class="profile-divider"></div>
+                    <div class="profile-signout" onclick="logout()">Sign out</div>
+                </div>
+            </div>
+        `;
+    });
+
+    function toggleProfileMenu(e) {
+        e.stopPropagation();
+        const menu = document.getElementById("profileMenu");
+        if (menu)
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    document.addEventListener("click", () => {
+        const menu = document.getElementById("profileMenu");
+        if (menu) menu.style.display = "none";
+    });
+
+    function goToContact() {
+        window.location.href = "contact.html";
+    }
+
+    function goToedit() {
+        window.location.href = "edit-profile.html";
+    }
+
+    function logout() {
+        localStorage.clear();
+        sessionStorage.clear();
+        alert("You have been logged out!");
+        window.location.href = "index1.html";
+    }
+
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    // ===== LOGIN FORM - INTEGRATED WITH DEPLOYED BACKEND LINK =====
+    // The backend API endpoint is now connected to the deployed Render link: https://smart-museum-0xgs.onrender.com
+    document.getElementById('signin-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        
+        errorMessage.style.display = 'none';
+        document.getElementById('successMessage').style.display = 'none';
+        
+        try {
+            console.log('🔐 Sending login request to backend...');
+            // UPDATED: Backend URL integrated as required - using the deployed Render link
+            const BACKEND_URL = 
+'https://smart-museum-1.onrender.com';
+            
+            const response = await fetch(`${BACKEND_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            console.log('📊 Login response:', data);
+
+            if (data.success) {
+                // Save complete user object to localStorage (only once)
+                const userData = {
+                    user_id: data.user.user_id,
+                    username: data.user.username,
+                    email: data.user.email,
+                    phone_number: data.user.phone_number,
+                    gender: data.user.gender,
+                    age: data.user.age
+                };
+                
+                localStorage.setItem("currentUser", JSON.stringify(userData));
+                
+                console.log("✅ User saved successfully:", userData);
+                console.log("✅ User ID stored:", userData.user_id);
+                
+                alert("Login successful! Welcome to Smart Museum.");
+                
+                // Redirect logic: check for stored redirect URL or default to index.html
+                const redirectUrl = sessionStorage.getItem("redirectAfterLogin");
+                if (redirectUrl) {
+                    sessionStorage.removeItem("redirectAfterLogin");
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.href = "index.html";
+                }
+            } else {
+                errorText.textContent = data.message || 'Invalid username or password. Please try again.';
+                errorMessage.style.display = 'block';
+                // Shake animation for error feedback
+                const signinBox = document.querySelector('.signin-box');
+                if (signinBox) {
+                    signinBox.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => { signinBox.style.animation = ''; }, 500);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Login network error:', error);
+            errorText.textContent = 'Unable to connect to the server. Please check your internet or try again later.';
+            errorMessage.style.display = 'block';
+        }
+    });
+    
+    // Check for registration success (query param)
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('registered') === 'true') {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            
+            successText.textContent = 'Registration successful! Please sign in with your credentials.';
+            successMessage.style.display = 'block';
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
+        // Auto-fill "remember me" if previously stored
+        const savedUsername = localStorage.getItem('rememberedUsername');
+        if (savedUsername) {
+            document.getElementById('username').value = savedUsername;
+            document.getElementById('remember').checked = true;
+        }
+    });
+    
+    // Remember me functionality (store username if checkbox checked)
+    const rememberCheckbox = document.getElementById('remember');
+    const usernameInput = document.getElementById('username');
+    
+    document.getElementById('signin-form').addEventListener('submit', function() {
+        if (rememberCheckbox.checked) {
+            localStorage.setItem('rememberedUsername', usernameInput.value);
+        } else {
+            localStorage.removeItem('rememberedUsername');
+        }
+    });
+    
+    // Add shake keyframes (if not already present)
+    if (!document.querySelector('#shake-keyframes')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'shake-keyframes';
+        styleSheet.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                20%, 40%, 60%, 80% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    }
+    </script>
+</body>
+</html>

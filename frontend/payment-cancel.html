@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Cancelled</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #93291e, #ed213a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #fff;
+      width: 90%;
+      max-width: 420px;
+      padding: 40px 30px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      animation: pop 0.8s ease;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.6);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .cross {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, #ff5252, #ff1744);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: #fff;
+      font-size: 45px;
+      box-shadow: 0 10px 20px rgba(255, 23, 68, 0.4);
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    p {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .details {
+      background: #fbe9e7;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 30px;
+    }
+
+    .details span {
+      font-weight: 600;
+      color: #b71c1c;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    a {
+      display: inline-block;
+      padding: 12px 26px;
+      text-decoration: none;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: 0.3s ease;
+    }
+
+    .retry {
+      background: linear-gradient(135deg, #ff5252, #ff1744);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(255, 23, 68, 0.4);
+    }
+
+    .retry:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255, 23, 68, 0.6);
+    }
+
+    .home {
+      background: #eee;
+      color: #333;
+    }
+
+    .home:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <div class="cross">✕</div>
+    <h1>Payment Cancelled</h1>
+    <p>Your payment was not completed.</p>
+
+    <div class="details">
+      ❌ Ticket Status: <span>Not Confirmed</span><br>
+      🔄 You can try again to complete the payment.
+    </div>
+
+    <div class="buttons">
+      <a href="index1.html" class="home">Go Home</a>
+    </div>
+  </div>
+
+  <script>
+  // ===== BACKEND URL - INTEGRATED WITH DEPLOYED LINK =====
+  const BACKEND_URL = 'https://smart-museum-1.onrender.com';
+  
+  function restoreUserData() {
+    console.log("🔄 Restoring user data on cancel page...");
+    
+    // Try multiple sources
+    let backupUser = sessionStorage.getItem("backupUser");
+    
+    if (!backupUser) {
+      backupUser = localStorage.getItem("payment_backup");
+    }
+    
+    if (backupUser) {
+      try {
+        const userData = JSON.parse(backupUser);
+        console.log("📦 Found backup:", userData);
+        
+        // Check for user mismatch
+        const currentUserId = localStorage.getItem("user_id");
+        if (currentUserId && currentUserId !== userData.user_id) {
+          console.log("⚠️ User mismatch! Clearing and restoring...");
+          localStorage.clear();
+        }
+        
+        // Restore all user data
+        if (userData.user_id) localStorage.setItem("user_id", userData.user_id);
+        if (userData.username) localStorage.setItem("username", userData.username);
+        if (userData.email) localStorage.setItem("email", userData.email);
+        if (userData.phone) localStorage.setItem("phone", userData.phone);
+        if (userData.gender) localStorage.setItem("gender", userData.gender);
+        if (userData.age) localStorage.setItem("age", userData.age);
+        
+        if (userData.currentUser) {
+          localStorage.setItem("currentUser", userData.currentUser);
+        } else {
+          const currentUser = {
+            user_id: userData.user_id,
+            username: userData.username,
+            email: userData.email
+          };
+          localStorage.setItem("currentUser", JSON.stringify(currentUser));
+        }
+        
+        console.log("✅ User data restored on cancel page");
+        console.log("👤 Current user:", localStorage.getItem("currentUser"));
+        
+        // Clear backups
+        sessionStorage.removeItem("backupUser");
+        sessionStorage.removeItem("pendingBooking");
+        localStorage.removeItem("payment_backup");
+        localStorage.removeItem("pendingBooking_backup");
+        
+      } catch (e) {
+        console.error("❌ Error restoring on cancel page:", e);
+      }
+    } else {
+      console.log("⚠️ No backup user found on cancel page");
+    }
+  }
+
+  (function() {
+    restoreUserData();
+  })();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    restoreUserData();
+    
+    const params = new URLSearchParams(window.location.search);
+    const session_id = params.get("session_id");
+    
+    if (session_id) {
+      console.log("❌ Cancelled session:", session_id);
+      console.log("📡 Sending cancellation to:", `${BACKEND_URL}/api/payment-cancelled`);
+      
+      // Using the deployed backend URL for cancellation notification
+      fetch(`${BACKEND_URL}/api/payment-cancelled`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: session_id })
+      }).catch(err => console.error("Error sending cancellation:", err));
+    }
+  });
+
+  console.log("📱 Cancel page loaded:", {
+    url: window.location.href,
+    backend_url: BACKEND_URL,
+    timestamp: new Date().toISOString(),
+    hasBackup: !!sessionStorage.getItem("backupUser") || !!localStorage.getItem("payment_backup")
+  });
+</script>
+</body>
+</html>

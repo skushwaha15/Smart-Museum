@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Edit Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f5f6f7;
+    padding: 40px;
+}
+
+
+.profile-card {
+    max-width: 800px;
+    background: #fff;
+    margin: auto;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: #777;
+}
+
+.profile-header h2 {
+    margin: 0;
+    font-size: 26px;
+}
+
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+
+.field-row {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.field {
+    flex: 1;
+    min-width: 260px;
+}
+
+.field label {
+    font-size: 14px;
+    color: #555;
+}
+
+.input-box {
+    margin-top: 6px;
+    position: relative;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.input-box input.error {
+    border-color: red;
+}
+
+.edit-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+
+.error-text {
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+
+.save-btn {
+    margin-top: 30px;
+    padding: 12px 25px;
+    border: none;
+    background: #000;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-avatar">👤</div>
+        <h2 id="username">Guest</h2>
+    </div>
+
+    <div class="section-title">Account Details</div>
+
+    <div class="field-row">
+        
+        <div class="field">
+            <label>Mobile Number</label>
+            <div class="input-box">
+                <input type="text" id="mobile" placeholder="Enter 10-digit number">
+                <span class="edit-btn" onclick="enableEdit('mobile')">✏ Edit</span>
+            </div>
+            <div id="mobileError" class="error-text"></div>
+        </div>
+
+        
+        <div class="field">
+            <label>Email Address</label>
+            <div class="input-box">
+                <input type="email" id="email" readonly>
+                <span class="edit-btn" onclick="enableEdit('email')">✏ Edit</span>
+            </div>
+            <div id="emailError" class="error-text"></div>
+        </div>
+    </div>
+
+    <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+</div>
+
+<script>
+// ===== BACKEND URL - INTEGRATED WITH DEPLOYED LINK =====
+const BACKEND_URL = 'https://smart-museum-1.onrender.com';
+
+const user = JSON.parse(localStorage.getItem("currentUser"));
+
+if (!user) {
+    alert("Login required");
+    window.location.href = "signin.html";
+}
+
+document.getElementById("username").textContent = user.username;
+document.getElementById("email").value = user.email || "";
+document.getElementById("mobile").value = user.phone_number || "";
+
+
+
+function validateEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+}
+
+function validateMobile(mobile) {
+    return /^[6-9]\d{9}$/.test(mobile);
+}
+
+
+
+async function saveProfile() {
+    const emailInput = document.getElementById("email");
+    const mobileInput = document.getElementById("mobile");
+
+    const email = emailInput.value.trim();
+    const phone_number = mobileInput.value.trim();
+
+    let valid = true;
+
+    
+    document.getElementById("emailError").innerText = "";
+    document.getElementById("mobileError").innerText = "";
+    emailInput.classList.remove("error");
+    mobileInput.classList.remove("error");
+
+    
+    if (!validateEmail(email)) {
+        document.getElementById("emailError").innerText = "❌ Enter a valid email address";
+        emailInput.classList.add("error");
+        valid = false;
+    }
+
+    if (!validateMobile(phone_number)) {
+        document.getElementById("mobileError").innerText = "❌ Enter valid 10-digit Indian mobile number";
+        mobileInput.classList.add("error");
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    try {
+        // Using deployed backend URL for profile update
+        const res = await fetch(`${BACKEND_URL}/api/edit-profile`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userId: user.user_id,
+                email,
+                phone_number
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            user.email = email;
+            user.phone_number = phone_number;
+            localStorage.setItem("currentUser", JSON.stringify(user));
+            alert("✅ Profile updated successfully");
+        } else {
+            alert("❌ Update failed: " + (data.message || "Unknown error"));
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("❌ Server error. Please try again later.");
+    }
+}
+
+function enableEdit(id) {
+    const input = document.getElementById(id);
+    input.removeAttribute("readonly");
+    input.focus();
+}
+</script>
+
+</body>
+</html>
