@@ -8,8 +8,7 @@ const bwipjs = require("bwip-js");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require('bcrypt');
 
-// Existing imports ke saath ye add karo
-const emailjs = require('@emailjs/nodejs');
+
 
 // Load environment variables - IMPORTANT: Yeh sabse pehle hona chahiye
 require('dotenv').config();
