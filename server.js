@@ -85,16 +85,6 @@ transporter.verify(function(error, success) {
 let adminOtpStore = {};
 let otpStore = {};
 
-// ==================== EMAILJS CONFIGURATION ====================
-// Ye code transporter.verify ke baad add karo (around line 100)
-
-// EmailJS Setup
-const emailjsClient = emailjs;
-emailjsClient.init({
-    publicKey: process.env.EMAILJS_PUBLIC_KEY,
-    privateKey: process.env.EMAILJS_PRIVATE_KEY
-});
-console.log('✅ EmailJS initialized');
 
 // TEST API
 app.get('/api/test', (req, res) => {
@@ -1344,60 +1334,6 @@ app.get('/api/admin/recent-bookings', async (req, res) => {
     }
 });
 
-// ==================== CONTACT FORM API (EmailJS) ====================
-app.post('/api/send-contact', async (req, res) => {
-    const { from_name, from_email, message } = req.body;
-    
-    console.log("📧 Sending contact email from:", from_email);
-    
-    if (!from_name || !from_email || !message) {
-        return res.status(400).json({ 
-            success: false, 
-            message: "All fields are required" 
-        });
-    }
-    
-    try {
-        // 1. Admin ko email (template_hscpnr5)
-        const adminResult = await emailjsClient.send(
-            process.env.EMAILJS_SERVICE_ID,
-            process.env.EMAILJS_TEMPLATE_ADMIN,
-            {
-                from_name: from_name,
-                from_email: from_email,
-                message: message,
-                to_email: "kr0430353@gmail.com"
-            }
-        );
-        console.log("✅ Admin email sent:", adminResult.status);
-        
-        // 2. User ko confirmation email (template_04qjeen)
-        const userResult = await emailjsClient.send(
-            process.env.EMAILJS_SERVICE_ID,
-            process.env.EMAILJS_TEMPLATE_USER,
-            {
-                from_name: from_name,
-                from_email: from_email,
-                message: message,
-                to_email: from_email
-            }
-        );
-        console.log("✅ User confirmation sent:", userResult.status);
-        
-        res.json({ 
-            success: true, 
-            message: "Email sent successfully!" 
-        });
-        
-    } catch (error) {
-        console.error("❌ EmailJS Error:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Failed to send email",
-            error: error.message 
-        });
-    }
-});
 app.listen(process.env.PORT || 5000, () => {
     console.log(`🚀 Server running on http://localhost:${process.env.PORT || 5000}`);
     console.log(`📋 Test endpoint: http://localhost:${process.env.PORT || 5000}/api/test`);
