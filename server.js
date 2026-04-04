@@ -2,21 +2,24 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const nodemailer = require("nodemailer");
-const Stripe = require('stripe'); 
+const Stripe = require('stripe'); // Change this line
 const PDFDocument = require("pdfkit");
 const bwipjs = require("bwip-js");
 const { v4: uuidv4 } = require("uuid");
 
+// Existing imports ke saath ye add karo
+const emailjs = require('@emailjs/nodejs');
 
+// Load environment variables - IMPORTANT: Yeh sabse pehle hona chahiye
 require('dotenv').config();
 
-
+// Debug: Check if environment variables are loaded
 console.log('🔍 Checking environment variables:');
 console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 console.log('SUPABASE_PASSWORD exists:', !!process.env.SUPABASE_PASSWORD);
 console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
 
-
+// Initialize Stripe with the secret key
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
@@ -81,6 +84,17 @@ transporter.verify(function(error, success) {
 
 let adminOtpStore = {};
 let otpStore = {};
+
+// ==================== EMAILJS CONFIGURATION ====================
+// Ye code transporter.verify ke baad add karo (around line 100)
+
+// EmailJS Setup
+const emailjsClient = emailjs;
+emailjsClient.init({
+    publicKey: process.env.EMAILJS_PUBLIC_KEY,
+    privateKey: process.env.EMAILJS_PRIVATE_KEY
+});
+console.log('✅ EmailJS initialized');
 
 // TEST API
 app.get('/api/test', (req, res) => {
@@ -220,7 +234,7 @@ app.post('/api/send-otp', async (req, res) => {
             res.json({
                 success: true,
                 message: 'OTP sent successfully to your email',
-                otp: otp
+                
             });
         });
     } catch (err) {
@@ -293,7 +307,9 @@ app.post('/api/reset-password', async (req, res) => {
 
     try {
         const queryText = 'UPDATE "user" SET password = $1 WHERE email = $2';
-        const result = await query(queryText, [newPassword, email]);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        const result = await query(queryText, [hashedPassword, email]);
 
         if (result.rowCount === 0) {
             return res.status(404).json({
@@ -345,12 +361,15 @@ app.post('/api/register', async (req, res) => {
         const genderMap = { male: 'Male', female: 'Female', other: 'Other', 'prefer-not-to-say': 'Other' };
         const dbGender = genderMap[gender] || 'Other';
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const insertQuery = `
             INSERT INTO "user" (username, email, phone_number, gender, age, password) 
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id
         `;
+        
 
-        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null, password]);
+        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null,  hashedPassword]);
         
         console.log('✅ User registered successfully. ID:', insertResult.rows[0].user_id);
         res.json({ success: true, message: 'Registration successful!', user_id: insertResult.rows[0].user_id, username });
@@ -379,9 +398,11 @@ app.post('/api/login', async (req, res) => {
         }
 
         const user = result.rows[0];
-        if (password !== user.password) {
-            return res.status(401).json({ success: false, message: 'Invalid username or password!' });
-        }
+        const isMatch = await bcrypt.compare(password, user.password);
+
+         if (!isMatch) {
+    return res.status(401).json({ success: false, message: 'Invalid username or password!' });
+}
 
         const userData = {
             user_id: user.user_id,
@@ -442,12 +463,15 @@ app.post("/api/admin/login", async (req, res) => {
         }
 
         const admin = result.rows[0];
-        if (admin.password !== password) {
-            return res.status(401).json({
-                success: false,
-                message: "Invalid admin username or password"
-            });
-        }
+
+        const isMatch = await bcrypt.compare(password, admin.password);
+
+       if (!isMatch) {
+        return res.status(401).json({
+        success: false,
+        message: "Invalid admin username or password"
+    });
+}
 
         console.log("✅ Admin logged in successfully");
         return res.json({
@@ -520,7 +544,12 @@ app.post("/api/admin/reset-password", async (req, res) => {
     const { email, newPassword } = req.body;
 
     try {
-        await query("UPDATE admin SET password = $1 WHERE email = $2", [newPassword, email]);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+   await query(
+    "UPDATE admin SET password = $1 WHERE email = $2",
+    [hashedPassword, email]
+);
         delete adminOtpStore[email];
         res.json({ success: true, message: "Password reset successful" });
     } catch (err) {
@@ -811,16 +840,16 @@ app.get("/api/admin/users", async (req, res) => {
 // ADMIN BOOKINGS LIST - FIXED
 app.get("/api/admin/bookings", async (req, res) => {
     try {
-       
+        // First, check if there are any bookings
         const countResult = await query("SELECT COUNT(*) as count FROM booking");
         console.log("📊 Total bookings in DB:", countResult.rows[0].count);
         
-      
+        // If no bookings, return empty array
         if (parseInt(countResult.rows[0].count) === 0) {
             return res.json({ success: true, bookings: [] });
         }
         
-        
+        // Get bookings with museum names - use LEFT JOIN
         const sql = `
             SELECT 
                 b.booking_id,
@@ -840,7 +869,7 @@ app.get("/api/admin/bookings", async (req, res) => {
         const result = await query(sql);
         console.log(`✅ Found ${result.rows.length} bookings with museum names`);
         
-      
+        // Debug: Log first booking to see if museum_name is there
         if (result.rows.length > 0) {
             console.log("📋 First booking:", {
                 id: result.rows[0].booking_id,
@@ -895,8 +924,10 @@ app.post("/api/create-checkout-session", async (req, res) => {
                 gender: gender || "",
                 userId: userId || ""
             },
-            success_url: "https://frontend-rho-nine-45.vercel.app/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url: "https://frontend-rho-nine-45.vercel.app/payment-cancel.html",
+
+             success_url: "https://museum-rosy.vercel.app/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url: "https://museum-rosy.vercel.app/payment-cancel.html",
+
         });
 
         console.log("✅ Session created:", session.id);
@@ -933,7 +964,7 @@ app.get("/api/payment-success", async (req, res) => {
             return res.json({ success: false, error: "Email not found in session" });
         }
 
-     
+        // ✅ FIX: Convert gender to proper case
         let finalGender = "Other";
         if (gender) {
             const genderLower = gender.toLowerCase().trim();
@@ -1024,7 +1055,7 @@ app.get("/api/payment-success", async (req, res) => {
                 console.log("   Continuing with database save...");
             }
 
-         
+            // Save to PostgreSQL - USE finalGender here
             const sql = `INSERT INTO booking (
                 booking_id, name, age, email, phone_number, gender,
                 visit_date, num_adults, num_children, amount_paid,
@@ -1037,7 +1068,7 @@ app.get("/api/payment-success", async (req, res) => {
                 userAge ? parseInt(userAge) : null,
                 email,
                 phoneNumber || null,
-                finalGender,  
+                finalGender,  // ✅ FIX: Use finalGender instead of gender
                 visitDate,
                 adult,
                 child,
@@ -1075,7 +1106,7 @@ app.get("/api/payment-success", async (req, res) => {
             }
         });
 
-        
+        // Generate PDF content (same as before)
         doc.fontSize(24).text("SMART MUSEUM JAIPUR", { align: "center" });
         doc.moveDown();
         doc.fontSize(16).text("ENTRY TICKET", { align: "center" });
@@ -1200,12 +1231,12 @@ app.get('/api/admin/stats', async (req, res) => {
     }
 });
 
-// ADMIN DASHBOARD APIs 
+// ADMIN DASHBOARD APIs - FIXED MONTHLY REVENUE
 app.get('/api/admin/monthly-revenue', async (req, res) => {
     try {
         console.log("📊 Fetching monthly revenue...");
         
-        
+        // Get all bookings grouped by month
         const queryText = `
             SELECT 
                 TO_CHAR(booking_date, 'YYYY-MM') as month,
@@ -1234,7 +1265,7 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
             console.log(`Month: ${monthName} ${year}, Revenue: ${row.total_revenue}`);
         });
         
-      
+        // If no data, send sample data for testing
         if (months.length === 0) {
             console.log("No revenue data found, sending sample data");
             res.json({
@@ -1250,7 +1281,7 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
         
     } catch (error) {
         console.error('Revenue fetch error:', error);
-       
+        // Send fallback data on error
         res.json({
             months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
             revenues: [0, 0, 0, 0, 0, 0]
@@ -1258,7 +1289,7 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
     }
 });
 
-// Get popular museums 
+// Get popular museums - FIXED
 app.get('/api/admin/popular-museums', async (req, res) => {
     try {
         const queryText = `
@@ -1280,7 +1311,7 @@ app.get('/api/admin/popular-museums', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-// Get recent bookings
+// Get recent bookings - FIXED
 app.get('/api/admin/recent-bookings', async (req, res) => {
     try {
         const queryText = `
@@ -1301,7 +1332,7 @@ app.get('/api/admin/recent-bookings', async (req, res) => {
         const result = await query(queryText);
         console.log(`📋 Found ${result.rows.length} recent bookings`);
         
-     
+        // Log first booking to debug
         if (result.rows.length > 0) {
             console.log("📋 First recent booking:", result.rows[0]);
         }
@@ -1310,6 +1341,61 @@ app.get('/api/admin/recent-bookings', async (req, res) => {
     } catch (error) {
         console.error('Recent bookings error:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== CONTACT FORM API (EmailJS) ====================
+app.post('/api/send-contact', async (req, res) => {
+    const { from_name, from_email, message } = req.body;
+    
+    console.log("📧 Sending contact email from:", from_email);
+    
+    if (!from_name || !from_email || !message) {
+        return res.status(400).json({ 
+            success: false, 
+            message: "All fields are required" 
+        });
+    }
+    
+    try {
+        // 1. Admin ko email (template_hscpnr5)
+        const adminResult = await emailjsClient.send(
+            process.env.EMAILJS_SERVICE_ID,
+            process.env.EMAILJS_TEMPLATE_ADMIN,
+            {
+                from_name: from_name,
+                from_email: from_email,
+                message: message,
+                to_email: "kr0430353@gmail.com"
+            }
+        );
+        console.log("✅ Admin email sent:", adminResult.status);
+        
+        // 2. User ko confirmation email (template_04qjeen)
+        const userResult = await emailjsClient.send(
+            process.env.EMAILJS_SERVICE_ID,
+            process.env.EMAILJS_TEMPLATE_USER,
+            {
+                from_name: from_name,
+                from_email: from_email,
+                message: message,
+                to_email: from_email
+            }
+        );
+        console.log("✅ User confirmation sent:", userResult.status);
+        
+        res.json({ 
+            success: true, 
+            message: "Email sent successfully!" 
+        });
+        
+    } catch (error) {
+        console.error("❌ EmailJS Error:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Failed to send email",
+            error: error.message 
+        });
     }
 });
 app.listen(process.env.PORT || 5000, () => {
