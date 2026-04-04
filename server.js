@@ -6,6 +6,7 @@ const Stripe = require('stripe'); // Change this line
 const PDFDocument = require("pdfkit");
 const bwipjs = require("bwip-js");
 const { v4: uuidv4 } = require("uuid");
+const bcrypt = require('bcrypt');
 
 // Existing imports ke saath ye add karo
 const emailjs = require('@emailjs/nodejs');
