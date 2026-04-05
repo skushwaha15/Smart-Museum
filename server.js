@@ -71,22 +71,7 @@ const transporter = nodemailer.createTransport({
     }
 })();
 
-app.get("/test-email", async (req, res) => {
-    try {
-        const info = await transporter.sendMail({
-            from: `"Test" <a73020001@smtp-brevo.com>`,
-            to: "sejalkushwaha342@gmail.com",
-            subject: "TEST EMAIL",
-            text: "Hello from server"
-        });
 
-        console.log("SUCCESS:", info);
-        res.send("Email sent");
-    } catch (err) {
-        console.error("ERROR:", err);
-        res.send("Failed");
-    }
-});
 
 
 
