@@ -53,30 +53,33 @@ const query = async (text, params) => {
 };
 
 // ==================== EMAIL CONFIGURATION - BREVO (SECURE) ====================
+// ==================== EMAIL CONFIGURATION - BREVO (FIXED) ====================
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
-    port: 2525,
-    secure: true,
+    port: 587,
+    secure: false,  // false for port 587 (STARTTLS)
     auth: {
         user: process.env.BREVO_EMAIL,
         pass: process.env.BREVO_SMTP_KEY
     },
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        ciphers: "SSLv3"
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000
 });
 
-(async () => {
+const verifyTransporter = async () => {
     try {
         await transporter.verify();
         console.log("✅ Email server is ready (Brevo)");
     } catch (err) {
-        console.error("❌ VERIFY ERROR:", err);
+        console.error("❌ VERIFY ERROR:", err.message);
     }
-})();
+};
+verifyTransporter();
 
 
 
