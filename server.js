@@ -63,43 +63,49 @@ const query = async (text, params) => {
         throw err;
     }
 };
-
 // ==================== EMAIL CONFIGURATION with BREVO ====================
 console.log('📧 Initializing Brevo email transporter...');
 
-// Check if required environment variables exist
+// Check if credentials exist
 if (!process.env.BREVO_EMAIL || !process.env.BREVO_SMTP_KEY) {
-    console.error('❌ CRITICAL: BREVO_EMAIL or BREVO_SMTP_KEY not set in environment!');
-    console.error('   Please add these variables in Render dashboard.');
+    console.error('❌ CRITICAL: BREVO_EMAIL or BREVO_SMTP_KEY not found!');
+    console.error('   Current EMAIL_USER:', process.env.EMAIL_USER);
+} else {
+    console.log('✅ Credentials found:');
+    console.log('   BREVO_EMAIL:', process.env.BREVO_EMAIL);
+    console.log('   BREVO_SMTP_KEY length:', process.env.BREVO_SMTP_KEY.length);
 }
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
-    port: 465,              
-    secure: true,           
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.BREVO_EMAIL,
         pass: process.env.BREVO_SMTP_KEY
     },
-    connectionTimeout: 30000,  
+    connectionTimeout: 30000,
     greetingTimeout: 30000,
-    socketTimeout: 30000
+    socketTimeout: 30000,
+    debug: true,  // Enable debug logging
+    logger: true  // Enable logger
 });
 
-// Verify connection with better logging
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ Brevo connection FAILED:');
+// Verify with promise for better error handling
+transporter.verify()
+    .then(() => {
+        console.log('✅ Brevo email server is READY!');
+        console.log('📧 Using account:', process.env.BREVO_EMAIL);
+        console.log('🔌 Connected to smtp-relay.brevo.com:465 (SSL)');
+        console.log('📨 Free tier: 300 emails/day');
+    })
+    .catch((error) => {
+        console.error('❌ Brevo verification FAILED:');
         console.error('   Error:', error.message);
         console.error('   Code:', error.code);
-        console.error('   Check your BREVO_EMAIL and BREVO_SMTP_KEY');
-    } else {
-        console.log('✅ Brevo email server is ready!');
-        console.log('📧 Using account:', process.env.BREVO_EMAIL);
-        console.log('🔌 Connected to smtp-relay.brevo.com:587');
-        console.log('📨 Free tier: 300 emails/day');
-    }
-});
+        console.error('   Command:', error.command);
+        console.error('   Response:', error.response);
+    });
 let adminOtpStore = {};
 let otpStore = {};
 
