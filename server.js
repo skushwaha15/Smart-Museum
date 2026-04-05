@@ -62,50 +62,24 @@ const query = async (text, params) => {
         console.error('❌ Query error:', err.message);
         throw err;
     }
-};
-// ==================== EMAIL CONFIGURATION with BREVO ====================
-console.log('📧 Initializing Brevo email transporter...');
-
-// Check if credentials exist
-if (!process.env.BREVO_EMAIL || !process.env.BREVO_SMTP_KEY) {
-    console.error('❌ CRITICAL: BREVO_EMAIL or BREVO_SMTP_KEY not found!');
-    console.error('   Current EMAIL_USER:', process.env.EMAIL_USER);
-} else {
-    console.log('✅ Credentials found:');
-    console.log('   BREVO_EMAIL:', process.env.BREVO_EMAIL);
-    console.log('   BREVO_SMTP_KEY length:', process.env.BREVO_SMTP_KEY.length);
-}
-
+};// ==================== EMAIL CONFIGURATION ====================
 const transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 465,
-    secure: true,
+    service: "gmail",
     auth: {
-        user: process.env.BREVO_EMAIL,
-        pass: process.env.BREVO_SMTP_KEY
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
     },
-    connectionTimeout: 60000,
-    greetingTimeout: 60000,
-    socketTimeout: 60000,
-    debug: true,  // Enable debug logging
-    logger: true  // Enable logger
+    pool: true,
+    maxConnections: 1
 });
 
-// Verify with promise for better error handling
-transporter.verify()
-    .then(() => {
-        console.log('✅ Brevo email server is READY!');
-        console.log('📧 Using account:', process.env.BREVO_EMAIL);
-        console.log('🔌 Connected to smtp-relay.brevo.com:465 (SSL)');
-        console.log('📨 Free tier: 300 emails/day');
-    })
-    .catch((error) => {
-        console.error('❌ Brevo verification FAILED:');
-        console.error('   Error:', error.message);
-        console.error('   Code:', error.code);
-        console.error('   Command:', error.command);
-        console.error('   Response:', error.response);
-    });
+transporter.verify(function(error, success) {
+    if (error) {
+        console.log('❌ Email connection FAILED:', error);
+    } else {
+        console.log('✅ Email server is ready to send messages');
+    }
+});
 let adminOtpStore = {};
 let otpStore = {};
 
@@ -213,8 +187,8 @@ app.post('/api/send-otp', async (req, res) => {
         console.log('🔐 Generated OTP for', email, ':', otp);
 
         const mailOptions = {
-            from: `"Smart Museum Jaipur" <${process.env.BREVO_EMAIL}>`,  
-             to: email,
+            from: process.env.EMAIL_USER,
+            to: email,
             subject: 'Password Reset OTP - Smart Museum Jaipur',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
