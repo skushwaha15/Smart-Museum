@@ -52,6 +52,18 @@ const query = async (text, params) => {
     }
 };
 
+app.get('/api/test-email-config', (req, res) => {
+    res.json({
+        brevo_email: process.env.BREVO_EMAIL,
+        brevo_key_exists: !!process.env.BREVO_SMTP_KEY,
+        transporter_config: {
+            host: "smtp-relay.brevo.com",
+            port: 587,
+            secure: false
+        }
+    });
+});
+
 // ==================== EMAIL CONFIGURATION - BREVO (SECURE) ====================
 // ==================== EMAIL CONFIGURATION - BREVO (FIXED) ====================
 const transporter = nodemailer.createTransport({
