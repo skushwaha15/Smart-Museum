@@ -2,27 +2,21 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const nodemailer = require("nodemailer");
-const Stripe = require('stripe'); // Change this line
+const Stripe = require('stripe');
 const PDFDocument = require("pdfkit");
 const bwipjs = require("bwip-js");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require('bcrypt');
 
-
-
-// Load environment variables - IMPORTANT: Yeh sabse pehle hona chahiye
+// Load environment variables
 require('dotenv').config();
 
-// Debug: Check if environment variables are loaded
+// Debug
 console.log('🔍 Checking environment variables:');
 console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 console.log('SUPABASE_PASSWORD exists:', !!process.env.SUPABASE_PASSWORD);
-console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
 
-
-// Initialize Stripe with the secret key
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -34,12 +28,9 @@ const pool = new Pool({
     user: process.env.SUPABASE_USER,
     password: process.env.SUPABASE_PASSWORD,
     database: process.env.SUPABASE_DATABASE,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: { rejectUnauthorized: false }
 });
 
-// Test connection
 const testConnection = async () => {
     try {
         const client = await pool.connect();
@@ -51,10 +42,8 @@ const testConnection = async () => {
         console.error('❌ PostgreSQL Connection Failed:', err.message);
     }
 };
-
 testConnection();
 
-// Helper function for queries
 const query = async (text, params) => {
     try {
         return await pool.query(text, params);
@@ -62,27 +51,28 @@ const query = async (text, params) => {
         console.error('❌ Query error:', err.message);
         throw err;
     }
-};// ==================== EMAIL CONFIGURATION ====================
+};
+
+// ==================== EMAIL CONFIGURATION - BREVO ====================
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp-relay.brevo.com",
+    port: 587,
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    },
-    pool: true,
-    maxConnections: 1
+        user: "a73020001@smtp-brevo.com",
+        pass: "G1pNzEFR42hqJV7y"
+    }
 });
 
 transporter.verify(function(error, success) {
     if (error) {
         console.log('❌ Email connection FAILED:', error);
     } else {
-        console.log('✅ Email server is ready to send messages');
+        console.log('✅ Email server is ready (Brevo)');
     }
 });
+
 let adminOtpStore = {};
 let otpStore = {};
-
 
 // TEST API
 app.get('/api/test', (req, res) => {
@@ -94,7 +84,6 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-// TEST DATABASE CONNECTION API
 app.get('/api/test-db', async (req, res) => {
     try {
         const result = await query('SELECT NOW() as time, COUNT(*) as user_count FROM "user"');
@@ -187,7 +176,7 @@ app.post('/api/send-otp', async (req, res) => {
         console.log('🔐 Generated OTP for', email, ':', otp);
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: "a73020001@smtp-brevo.com",
             to: email,
             subject: 'Password Reset OTP - Smart Museum Jaipur',
             html: `
@@ -207,29 +196,19 @@ app.post('/api/send-otp', async (req, res) => {
             `
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('❌ Error sending OTP:', error);
-                return res.status(500).json({
-                    success: false,
-                    message: 'Failed to send OTP. Please try again.',
-                    error: error.message
-                });
-            }
-           
-            console.log('✅ OTP sent successfully to:', email);
-           
-            res.json({
-                success: true,
-                message: 'OTP sent successfully to your email',
-               
-            });
+        await transporter.sendMail(mailOptions);
+        console.log('✅ OTP sent successfully to:', email);
+       
+        res.json({
+            success: true,
+            message: 'OTP sent successfully to your email'
         });
     } catch (err) {
-        console.error('❌ Database error:', err);
+        console.error('❌ Error sending OTP:', err);
         return res.status(500).json({
             success: false,
-            message: 'Database error'
+            message: 'Failed to send OTP. Please try again.',
+            error: err.message
         });
     }
 });
@@ -357,7 +336,7 @@ app.post('/api/register', async (req, res) => {
         `;
        
 
-        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null,  hashedPassword]);
+        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null, hashedPassword]);
        
         console.log('✅ User registered successfully. ID:', insertResult.rows[0].user_id);
         res.json({ success: true, message: 'Registration successful!', user_id: insertResult.rows[0].user_id, username });
@@ -388,9 +367,9 @@ app.post('/api/login', async (req, res) => {
         const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password);
 
-         if (!isMatch) {
-    return res.status(401).json({ success: false, message: 'Invalid username or password!' });
-}
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Invalid username or password!' });
+        }
 
         const userData = {
             user_id: user.user_id,
@@ -410,7 +389,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Get logged in user details
 app.get("/api/user/:id", async (req, res) => {
     const userId = req.params.id;
     try {
@@ -451,15 +429,14 @@ app.post("/api/admin/login", async (req, res) => {
         }
 
         const admin = result.rows[0];
-
         const isMatch = await bcrypt.compare(password, admin.password);
 
-       if (!isMatch) {
-        return res.status(401).json({
-        success: false,
-        message: "Invalid admin username or password"
-    });
-}
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid admin username or password"
+            });
+        }
 
         console.log("✅ Admin logged in successfully");
         return res.json({
@@ -504,16 +481,17 @@ app.post("/api/admin/send-otp", async (req, res) => {
             expires: Date.now() + 5 * 60 * 1000
         };
 
-        transporter.sendMail({
+        await transporter.sendMail({
+            from: "a73020001@smtp-brevo.com",
             to: email,
             subject: "Admin OTP - Smart Museum",
-            html: `<h2>Admin Password Reset</h2><h1>${otp}</h1>`
-        }, err => {
-            if (err) return res.status(500).json({ success: false, message: "Email failed" });
-            res.json({ success: true, message: "OTP sent" });
+            html: `<h2>Admin Password Reset</h2><h1>${otp}</h1><p>Valid for 5 minutes.</p>`
         });
+       
+        res.json({ success: true, message: "OTP sent" });
     } catch (err) {
-        return res.status(500).json({ success: false, message: "DB error" });
+        console.error("Admin OTP error:", err);
+        return res.status(500).json({ success: false, message: "Email failed" });
     }
 });
 
@@ -533,11 +511,7 @@ app.post("/api/admin/reset-password", async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-   await query(
-    "UPDATE admin SET password = $1 WHERE email = $2",
-    [hashedPassword, email]
-);
+        await query("UPDATE admin SET password = $1 WHERE email = $2", [hashedPassword, email]);
         delete adminOtpStore[email];
         res.json({ success: true, message: "Password reset successful" });
     } catch (err) {
@@ -594,7 +568,6 @@ app.get("/api/museums", async (req, res) => {
     }
 });
 
-// UPDATE PROFILE API
 app.put('/api/edit-profile', async (req, res) => {
     console.log('✏️ Update profile request:', req.body);
     const { userId, email, phone_number } = req.body;
@@ -750,7 +723,6 @@ app.delete('/api/admin/ticket/:id', async (req, res) => {
     }
 });
 
-// DELETE MUSEUM
 app.delete("/api/museum/:id", async (req, res) => {
     const museumId = req.params.id;
     try {
@@ -765,7 +737,6 @@ app.delete("/api/museum/:id", async (req, res) => {
     }
 });
 
-// CREATE NEW MUSEUM
 app.post("/api/admin/museum", async (req, res) => {
     const { name, description, address, open_time, close_time, main_image, city, category } = req.body;
     const sql = `
@@ -782,7 +753,6 @@ app.post("/api/admin/museum", async (req, res) => {
     }
 });
 
-// PUBLIC MUSEUM APIs
 app.get('/api/museum/:id', async (req, res) => {
     const museumId = req.params.id;
     try {
@@ -813,7 +783,6 @@ app.get('/api/museum/:id/gallery', async (req, res) => {
     }
 });
 
-// ADMIN USERS API
 app.get("/api/admin/users", async (req, res) => {
     const sql = `SELECT user_id, username, email, phone_number, gender, age FROM "user" ORDER BY user_id`;
     try {
@@ -825,19 +794,15 @@ app.get("/api/admin/users", async (req, res) => {
     }
 });
 
-// ADMIN BOOKINGS LIST - FIXED
 app.get("/api/admin/bookings", async (req, res) => {
     try {
-        // First, check if there are any bookings
         const countResult = await query("SELECT COUNT(*) as count FROM booking");
         console.log("📊 Total bookings in DB:", countResult.rows[0].count);
        
-        // If no bookings, return empty array
         if (parseInt(countResult.rows[0].count) === 0) {
             return res.json({ success: true, bookings: [] });
         }
        
-        // Get bookings with museum names - use LEFT JOIN
         const sql = `
             SELECT
                 b.booking_id,
@@ -855,16 +820,7 @@ app.get("/api/admin/bookings", async (req, res) => {
         `;
        
         const result = await query(sql);
-        console.log(`✅ Found ${result.rows.length} bookings with museum names`);
-       
-        // Debug: Log first booking to see if museum_name is there
-        if (result.rows.length > 0) {
-            console.log("📋 First booking:", {
-                id: result.rows[0].booking_id,
-                museum_id: result.rows[0].museum_id,
-                museum_name: result.rows[0].museum_name
-            });
-        }
+        console.log(`✅ Found ${result.rows.length} bookings`);
        
         res.json({ success: true, bookings: result.rows });
     } catch (err) {
@@ -912,15 +868,11 @@ app.post("/api/create-checkout-session", async (req, res) => {
                 gender: gender || "",
                 userId: userId || ""
             },
-
-             success_url: "https://museum-rosy.vercel.app/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
+            success_url: "https://museum-rosy.vercel.app/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
             cancel_url: "https://museum-rosy.vercel.app/payment-cancel.html",
-
         });
 
         console.log("✅ Session created:", session.id);
-        console.log("📦 Metadata userId:", session.metadata.userId);
-
         res.json({ success: true, url: session.url, sessionId: session.id });
 
     } catch (error) {
@@ -946,20 +898,12 @@ app.get("/api/payment-success", async (req, res) => {
         console.log("📦 Session metadata:", metadata);
 
         const { museumName, ticketType, email, visitDate, museumId, userName, userAge, phoneNumber, gender, userId } = metadata;
- // ❌ Sunday booking restriction
-const selectedDate = new Date(visitDate);
-if (selectedDate.getDay() === 0) {
-    return res.json({
-        success: false,
-        message: "Museums are closed on Sunday. Booking not allowed."
-    });
-}
+
         if (!email) {
             console.log("❌ ERROR: No email in metadata!");
             return res.json({ success: false, error: "Email not found in session" });
         }
 
-        // ✅ FIX: Convert gender to proper case
         let finalGender = "Other";
         if (gender) {
             const genderLower = gender.toLowerCase().trim();
@@ -967,11 +911,8 @@ if (selectedDate.getDay() === 0) {
                 finalGender = 'Male';
             } else if (genderLower === 'female' || genderLower === 'f') {
                 finalGender = 'Female';
-            } else if (genderLower === 'other' || genderLower === 'o') {
-                finalGender = 'Other';
             }
         }
-        console.log("👤 Gender conversion:", { original: gender, converted: finalGender });
 
         const bookingId = uuidv4().substring(0, 20);
        
@@ -984,34 +925,48 @@ if (selectedDate.getDay() === 0) {
             }
         }
 
-        const now = new Date();
-        const istOffset = 5.5 * 60 * 60 * 1000;
-        const istTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
+        const bookingDate = new Date().toISOString();
+       
+        const sql = `INSERT INTO booking (
+            booking_id, name, age, email, phone_number, gender,
+            visit_date, num_adults, num_children, amount_paid,
+            user_id, museum_id, booking_date, payment_status, stripe_session_id, is_used
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`;
 
-        const year = istTime.getFullYear();
-        const month = String(istTime.getMonth() + 1).padStart(2, '0');
-        const day = String(istTime.getDate()).padStart(2, '0');
-        const hours = String(istTime.getHours()).padStart(2, '0');
-        const minutes = String(istTime.getMinutes()).padStart(2, '0');
-        const seconds = String(istTime.getSeconds()).padStart(2, '0');
+        const values = [
+            bookingId,
+            userName || "Guest",
+            userAge ? parseInt(userAge) : null,
+            email,
+            phoneNumber || null,
+            finalGender,
+            visitDate,
+            adult,
+            child,
+            Math.round(session.amount_total / 100),
+            userId ? parseInt(userId) : null,
+            museumId ? parseInt(museumId) : null,
+            bookingDate,
+            "PAID",
+            session.id,
+            false
+        ];
 
-        const bookingDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        console.log("💾 Saving to database...");
+        await query(sql, values);
+        console.log("✅ Booking saved to database with ID:", bookingId);
 
-        console.log("📧 Preparing email for:", email);
-        console.log("🎟️ Ticket details:", { bookingId, adult, child, visitDate, userId });
-
-        // Create PDF
+        // Generate PDF and send email
         const buffers = [];
         const doc = new PDFDocument();
        
         doc.on("data", buffers.push.bind(buffers));
-       
         doc.on("end", async () => {
             const pdfData = Buffer.concat(buffers);
            
             try {
-                const mailResult = await transporter.sendMail({
-                    from: `"Smart Museum Jaipur" <${process.env.EMAIL_USER}>`,
+                await transporter.sendMail({
+                    from: `"Smart Museum Jaipur" <a73020001@smtp-brevo.com>`,
                     to: email,
                     subject: "Your Museum Ticket - Smart Museum Jaipur 🎟️",
                     html: `
@@ -1030,7 +985,7 @@ if (selectedDate.getDay() === 0) {
                                 <p><strong>Amount Paid:</strong> ₹${(session.amount_total / 100).toFixed(2)}</p>
                                 <p><strong>Booking Date:</strong> ${new Date().toLocaleString()}</p>
                             </div>
-                            <p>Please show the attached ticket at the entrance.</p>
+                            <p>Please find your ticket attached to this email.</p>
                             <br>
                             <p>Best regards,<br>Smart Museum Jaipur Team</p>
                         </div>
@@ -1041,67 +996,12 @@ if (selectedDate.getDay() === 0) {
                         contentType: 'application/pdf'
                     }]
                 });
-
                 console.log("✅ EMAIL SENT SUCCESSFULLY");
-                console.log("   Message ID:", mailResult.messageId);
-
             } catch (emailError) {
-                console.log("❌ EMAIL ERROR:", emailError.message);
-                console.log("   Continuing with database save...");
-            }
-
-            // Save to PostgreSQL - USE finalGender here
-            const sql = `INSERT INTO booking (
-                booking_id, name, age, email, phone_number, gender,
-                visit_date, num_adults, num_children, amount_paid,
-                user_id, museum_id, booking_date, payment_status, stripe_session_id, is_used
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`;
-
-            const values = [
-                bookingId,
-                userName || "Guest",
-                userAge ? parseInt(userAge) : null,
-                email,
-                phoneNumber || null,
-                finalGender,  // ✅ FIX: Use finalGender instead of gender
-                visitDate,
-                adult,
-                child,
-                Math.round(session.amount_total / 100),
-                userId ? parseInt(userId) : null,
-                museumId ? parseInt(museumId) : null,
-                bookingDate,
-                "PAID",
-                session.id,
-                false
-            ];
-
-            console.log("📦 Saving to database with userId:", userId);
-            console.log("📦 Gender being saved:", finalGender);
-
-            try {
-                await query(sql, values);
-                console.log("✅ Booking saved to database with ID:", bookingId);
-                console.log("   User ID saved:", userId);
-               
-                res.json({
-                    success: true,
-                    message: "Booking confirmed!",
-                    bookingId: bookingId,
-                    emailSent: false
-                });
-            } catch (dbError) {
-                console.error("❌ DB Save Error:", dbError);
-                return res.json({
-                    success: false,
-                    error: "Database save failed",
-                    details: dbError.message,
-                    bookingId: bookingId
-                });
+                console.error("❌ EMAIL ERROR:", emailError);
             }
         });
 
-        // Generate PDF content (same as before)
         doc.fontSize(24).text("SMART MUSEUM JAIPUR", { align: "center" });
         doc.moveDown();
         doc.fontSize(16).text("ENTRY TICKET", { align: "center" });
@@ -1122,25 +1022,29 @@ if (selectedDate.getDay() === 0) {
         doc.text(`Amount Paid: ₹${(session.amount_total / 100).toFixed(2)}`);
         doc.moveDown(2);
        
-        try {
-            const barcode = await bwipjs.toBuffer({
-                bcid: "code128",
-                text: bookingId,
-                scale: 3,
-                height: 10,
-                includetext: true
-            });
-            doc.image(barcode, { width: 250, align: "center" });
-        } catch (barcodeError) {
-            console.log("❌ Barcode error:", barcodeError);
-        }
-       
-        doc.moveDown();
-        doc.fontSize(10).text("Please show this ticket at the entrance.", { align: "center" });
-        doc.end();
+        bwipjs.toBuffer({
+            bcid: "code128",
+            text: bookingId,
+            scale: 3,
+            height: 10,
+            includetext: true
+        }, (err, barcodeBuffer) => {
+            if (!err && barcodeBuffer) {
+                doc.image(barcodeBuffer, { width: 250, align: "center" });
+            }
+            doc.moveDown();
+            doc.fontSize(10).text("Please show this ticket at the entrance.", { align: "center" });
+            doc.end();
+        });
+
+        res.json({ 
+            success: true, 
+            message: "Booking confirmed!",
+            bookingId: bookingId
+        });
 
     } catch (err) {
-        console.log("❌ ERROR in payment-success:", err);
+        console.error("❌ ERROR in payment-success:", err);
         res.json({ success: false, error: err.message });
     }
 });
@@ -1226,12 +1130,10 @@ app.get('/api/admin/stats', async (req, res) => {
     }
 });
 
-// ADMIN DASHBOARD APIs - FIXED MONTHLY REVENUE
 app.get('/api/admin/monthly-revenue', async (req, res) => {
     try {
         console.log("📊 Fetching monthly revenue...");
        
-        // Get all bookings grouped by month
         const queryText = `
             SELECT
                 TO_CHAR(booking_date, 'YYYY-MM') as month,
@@ -1257,12 +1159,9 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
             const monthName = monthNames[parseInt(month) - 1];
             months.push(`${monthName} ${year}`);
             revenues.push(parseFloat(row.total_revenue));
-            console.log(`Month: ${monthName} ${year}, Revenue: ${row.total_revenue}`);
         });
        
-        // If no data, send sample data for testing
         if (months.length === 0) {
-            console.log("No revenue data found, sending sample data");
             res.json({
                 months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                 revenues: [1250, 2340, 1890, 3120, 2780, 4120]
@@ -1276,7 +1175,6 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
        
     } catch (error) {
         console.error('Revenue fetch error:', error);
-        // Send fallback data on error
         res.json({
             months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
             revenues: [0, 0, 0, 0, 0, 0]
@@ -1284,7 +1182,6 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
     }
 });
 
-// Get popular museums - FIXED
 app.get('/api/admin/popular-museums', async (req, res) => {
     try {
         const queryText = `
@@ -1299,14 +1196,13 @@ app.get('/api/admin/popular-museums', async (req, res) => {
         `;
        
         const result = await query(queryText);
-        console.log("🏆 Popular museums:", result.rows);
         res.json(result.rows);
     } catch (error) {
         console.error('Popular museums error:', error);
         res.status(500).json({ error: error.message });
     }
 });
-// Get recent bookings - FIXED
+
 app.get('/api/admin/recent-bookings', async (req, res) => {
     try {
         const queryText = `
@@ -1325,13 +1221,6 @@ app.get('/api/admin/recent-bookings', async (req, res) => {
         `;
        
         const result = await query(queryText);
-        console.log(`📋 Found ${result.rows.length} recent bookings`);
-       
-        // Log first booking to debug
-        if (result.rows.length > 0) {
-            console.log("📋 First recent booking:", result.rows[0]);
-        }
-       
         res.json(result.rows);
     } catch (error) {
         console.error('Recent bookings error:', error);
