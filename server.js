@@ -64,25 +64,42 @@ const query = async (text, params) => {
     }
 };
 
-// ==================== EMAIL CONFIGURATION ====================
+
+// ==================== EMAIL CONFIGURATION for RENDER ====================
+console.log('📧 Initializing email transporter...');
+
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,  // SSL - Important for Render
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
     },
-    pool: true,
-    maxConnections: 1
+    // Timeout settings for Render
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
+    // Debug logging
+    debug: true,
+    logger: true
 });
 
+// Verify connection with better error logging
 transporter.verify(function(error, success) {
     if (error) {
-        console.log('❌ Email connection FAILED:', error);
+        console.log('❌ Email connection FAILED on Render:');
+        console.log('   Error:', error.message);
+        console.log('   Code:', error.code);
+        console.log('   Command:', error.command);
+        console.log('   Response:', error.response);
+        console.log('   ResponseCode:', error.responseCode);
     } else {
         console.log('✅ Email server is ready to send messages');
+        console.log('📧 Using account:', process.env.EMAIL_USER);
+        console.log('🔌 Connection: SSL on port 465');
     }
 });
-
 let adminOtpStore = {};
 let otpStore = {};
 
