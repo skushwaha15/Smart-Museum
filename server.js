@@ -8,13 +8,12 @@ const bwipjs = require("bwip-js");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require('bcrypt');
 
-// Load environment variables
 require('dotenv').config();
 
-// Debug
 console.log('🔍 Checking environment variables:');
 console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 console.log('SUPABASE_PASSWORD exists:', !!process.env.SUPABASE_PASSWORD);
+console.log('BREVO_EMAIL exists:', !!process.env.BREVO_EMAIL);
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
@@ -35,8 +34,6 @@ const testConnection = async () => {
     try {
         const client = await pool.connect();
         console.log('✅ PostgreSQL Connected Successfully to Supabase');
-        const result = await client.query('SELECT NOW() as time');
-        console.log('📅 Database time:', result.rows[0].time);
         client.release();
     } catch (err) {
         console.error('❌ PostgreSQL Connection Failed:', err.message);
@@ -53,13 +50,13 @@ const query = async (text, params) => {
     }
 };
 
-// ==================== EMAIL CONFIGURATION - BREVO ====================
+// ==================== EMAIL CONFIGURATION - BREVO (SECURE) ====================
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     port: 587,
     auth: {
-        user: "a73020001@smtp-brevo.com",
-        pass: "G1pNzEFR42hqJV7y"
+        user: process.env.BREVO_EMAIL,
+        pass: process.env.BREVO_SMTP_KEY
     }
 });
 
@@ -176,7 +173,7 @@ app.post('/api/send-otp', async (req, res) => {
         console.log('🔐 Generated OTP for', email, ':', otp);
 
         const mailOptions = {
-            from: "a73020001@smtp-brevo.com",
+            from: `"Smart Museum Jaipur" <${process.env.BREVO_EMAIL}>`,
             to: email,
             subject: 'Password Reset OTP - Smart Museum Jaipur',
             html: `
@@ -482,7 +479,7 @@ app.post("/api/admin/send-otp", async (req, res) => {
         };
 
         await transporter.sendMail({
-            from: "a73020001@smtp-brevo.com",
+            from: `"Smart Museum Jaipur" <${process.env.BREVO_EMAIL}>`,
             to: email,
             subject: "Admin OTP - Smart Museum",
             html: `<h2>Admin Password Reset</h2><h1>${otp}</h1><p>Valid for 5 minutes.</p>`
@@ -966,7 +963,7 @@ app.get("/api/payment-success", async (req, res) => {
            
             try {
                 await transporter.sendMail({
-                    from: `"Smart Museum Jaipur" <a73020001@smtp-brevo.com>`,
+                    from: `"Smart Museum Jaipur" <${process.env.BREVO_EMAIL}>`,
                     to: email,
                     subject: "Your Museum Ticket - Smart Museum Jaipur 🎟️",
                     html: `
@@ -1146,7 +1143,6 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
         `;
        
         const result = await query(queryText);
-        console.log("Monthly revenue query result:", result.rows);
        
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
