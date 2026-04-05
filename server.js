@@ -65,39 +65,28 @@ const query = async (text, params) => {
 };
 
 
-// ==================== EMAIL CONFIGURATION for RENDER ====================
-console.log('📧 Initializing email transporter...');
+// ==================== EMAIL CONFIGURATION with BREVO ====================
+console.log('📧 Initializing Brevo email transporter...');
 
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,  // SSL - Important for Render
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false, // TLS
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    },
-    // Timeout settings for Render
-    connectionTimeout: 30000,
-    greetingTimeout: 30000,
-    socketTimeout: 30000,
-    // Debug logging
-    debug: true,
-    logger: true
+        user: process.env.BREVO_EMAIL,
+        pass: process.env.BREVO_SMTP_KEY
+    }
 });
 
-// Verify connection with better error logging
+// Verify connection
 transporter.verify(function(error, success) {
     if (error) {
-        console.log('❌ Email connection FAILED on Render:');
-        console.log('   Error:', error.message);
-        console.log('   Code:', error.code);
-        console.log('   Command:', error.command);
-        console.log('   Response:', error.response);
-        console.log('   ResponseCode:', error.responseCode);
+        console.log('❌ Brevo connection FAILED:', error.message);
+        console.log('   Please check BREVO_EMAIL and BREVO_SMTP_KEY');
     } else {
-        console.log('✅ Email server is ready to send messages');
-        console.log('📧 Using account:', process.env.EMAIL_USER);
-        console.log('🔌 Connection: SSL on port 465');
+        console.log('✅ Brevo email server is ready!');
+        console.log('📧 Free tier: 300 emails/day');
+        console.log('🔌 Connected to smtp-relay.brevo.com:587');
     }
 });
 let adminOtpStore = {};
@@ -207,8 +196,8 @@ app.post('/api/send-otp', async (req, res) => {
         console.log('🔐 Generated OTP for', email, ':', otp);
 
         const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
+            from: `"Smart Museum Jaipur" <${process.env.BREVO_EMAIL}>`,  
+             to: email,
             subject: 'Password Reset OTP - Smart Museum Jaipur',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
