@@ -18,6 +18,8 @@ console.log('🔍 Checking environment variables:');
 console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 console.log('SUPABASE_PASSWORD exists:', !!process.env.SUPABASE_PASSWORD);
 console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
+console.log('EMAIL_USER:', process.env.EMAIL_USER);
+console.log('EMAIL_PASSWORD exists:', !!process.env.EMAIL_PASSWORD);
 
 // Initialize Stripe with the secret key
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
