@@ -52,16 +52,28 @@ const query = async (text, params) => {
     }
 };
 
-app.get('/api/test-email-config', (req, res) => {
-    res.json({
-        brevo_email: process.env.BREVO_EMAIL,
-        brevo_key_exists: !!process.env.BREVO_SMTP_KEY,
-        transporter_config: {
-            host: "smtp-relay.brevo.com",
-            port: 587,
-            secure: false
-        }
-    });
+// Test email endpoint
+app.post('/api/test-email', async (req, res) => {
+    const { to } = req.body;
+    
+    if (!to) {
+        return res.status(400).json({ success: false, message: "Email required" });
+    }
+    
+    try {
+        const info = await transporter.sendMail({
+            from: `"Smart Museum Jaipur" <${process.env.BREVO_EMAIL}>`,
+            to: to,
+            subject: "Test Email from Smart Museum",
+            html: "<h2>Test Successful!</h2><p>If you see this, email is working!</p>"
+        });
+        
+        console.log("Test email sent:", info.messageId);
+        res.json({ success: true, messageId: info.messageId });
+    } catch (err) {
+        console.error("Test email failed:", err);
+        res.json({ success: false, error: err.message });
+    }
 });
 
 // ==================== EMAIL CONFIGURATION - BREVO (SECURE) ====================
