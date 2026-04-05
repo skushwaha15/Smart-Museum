@@ -14,6 +14,8 @@ console.log('🔍 Checking environment variables:');
 console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 console.log('SUPABASE_PASSWORD exists:', !!process.env.SUPABASE_PASSWORD);
 console.log('BREVO_EMAIL exists:', !!process.env.BREVO_EMAIL);
+console.log("SMTP USER:", process.env.BREVO_EMAIL);
+console.log("SMTP PASS exists:", !!process.env.BREVO_SMTP_KEY);
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
