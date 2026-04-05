@@ -62,11 +62,29 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-transporter.verify(function(error, success) {
-    if (error) {
-        console.log('❌ Email connection FAILED:', error);
-    } else {
-        console.log('✅ Email server is ready (Brevo)');
+(async () => {
+    try {
+        await transporter.verify();
+        console.log("✅ Email server is ready (Brevo)");
+    } catch (err) {
+        console.error("❌ VERIFY ERROR:", err);
+    }
+})();
+
+app.get("/test-email", async (req, res) => {
+    try {
+        const info = await transporter.sendMail({
+            from: `"Test" <a73020001@smtp-brevo.com>`,
+            to: "sejalkushwaha342@gmail.com",
+            subject: "TEST EMAIL",
+            text: "Hello from server"
+        });
+
+        console.log("SUCCESS:", info);
+        res.send("Email sent");
+    } catch (err) {
+        console.error("ERROR:", err);
+        res.send("Failed");
     }
 });
 
