@@ -64,29 +64,41 @@ const query = async (text, params) => {
     }
 };
 
-
 // ==================== EMAIL CONFIGURATION with BREVO ====================
 console.log('📧 Initializing Brevo email transporter...');
+
+// Check if required environment variables exist
+if (!process.env.BREVO_EMAIL || !process.env.BREVO_SMTP_KEY) {
+    console.error('❌ CRITICAL: BREVO_EMAIL or BREVO_SMTP_KEY not set in environment!');
+    console.error('   Please add these variables in Render dashboard.');
+}
 
 const transporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
     port: 587,
-    secure: false, // TLS
+    secure: false,
     auth: {
         user: process.env.BREVO_EMAIL,
         pass: process.env.BREVO_SMTP_KEY
-    }
+    },
+    // Add connection timeout
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
 });
 
-// Verify connection
-transporter.verify(function(error, success) {
+// Verify connection with better logging
+transporter.verify((error, success) => {
     if (error) {
-        console.log('❌ Brevo connection FAILED:', error.message);
-        console.log('   Please check BREVO_EMAIL and BREVO_SMTP_KEY');
+        console.error('❌ Brevo connection FAILED:');
+        console.error('   Error:', error.message);
+        console.error('   Code:', error.code);
+        console.error('   Check your BREVO_EMAIL and BREVO_SMTP_KEY');
     } else {
         console.log('✅ Brevo email server is ready!');
-        console.log('📧 Free tier: 300 emails/day');
+        console.log('📧 Using account:', process.env.BREVO_EMAIL);
         console.log('🔌 Connected to smtp-relay.brevo.com:587');
+        console.log('📨 Free tier: 300 emails/day');
     }
 });
 let adminOtpStore = {};
