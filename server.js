@@ -1,22 +1,58 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-const nodemailer = require("nodemailer");
-const Stripe = require('stripe'); 
+
+const Stripe = require('stripe');
 const PDFDocument = require("pdfkit");
 const bwipjs = require("bwip-js");
 const { v4: uuidv4 } = require("uuid");
+const bcrypt = require('bcrypt');
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 
+const client = SibApiV3Sdk.ApiClient.instance;
+const apiKey = client.authentications['api-key'];
 
-require('dotenv').config();
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
+const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL;
+const isBrevoConfigured = Boolean(process.env.BREVO_API_KEY && brevoSenderEmail);
+const requiredEnvVars = [
+    'SUPABASE_HOST',
+    'SUPABASE_PORT',
+    'SUPABASE_USER',
+    'SUPABASE_PASSWORD',
+    'SUPABASE_DATABASE',
+    'STRIPE_SECRET_KEY'
+];
+const missingRequiredEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
 
+const sendBrevoEmail = async (payload) => {
+    if (!isBrevoConfigured) {
+        throw new Error('Brevo is not configured. Set BREVO_API_KEY and BREVO_SENDER_EMAIL in smart-museum/.env');
+    }
+
+    return emailApi.sendTransacEmail({
+        sender: {
+            email: brevoSenderEmail,
+            name: payload.senderName || "Smart Museum Jaipur"
+        },
+        ...payload
+    });
+};
+
+// Debug: Check if environment variables are loaded
 console.log('🔍 Checking environment variables:');
 console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 console.log('SUPABASE_PASSWORD exists:', !!process.env.SUPABASE_PASSWORD);
-console.log('EMAIL_USER exists:', !!process.env.EMAIL_USER);
+console.log('BREVO_API_KEY exists:', !!process.env.BREVO_API_KEY);
+console.log('BREVO_SENDER_EMAIL exists:', !!process.env.BREVO_SENDER_EMAIL);
+if (missingRequiredEnvVars.length > 0) {
+    console.warn('Missing required environment variables:', missingRequiredEnvVars.join(', '));
+}
 
-
+// Initialize Stripe with the secret key
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
@@ -61,52 +97,63 @@ const query = async (text, params) => {
 };
 
 // ==================== EMAIL CONFIGURATION ====================
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    },
-    pool: true,
-    maxConnections: 1
-});
-
-transporter.verify(function(error, success) {
-    if (error) {
-        console.log('❌ Email connection FAILED:', error);
-    } else {
-        console.log('✅ Email server is ready to send messages');
-    }
-});
-
 let adminOtpStore = {};
 let otpStore = {};
 
 // TEST API
 app.get('/api/test', (req, res) => {
-    res.json({ 
-        success: true, 
-        message: 'Server is working!', 
+    res.json({
+        success: true,
+        message: 'Server is working!',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development'
     });
+});
+
+app.get('/api/health', async (req, res) => {
+    const health = {
+        success: missingRequiredEnvVars.length === 0,
+        environment: process.env.NODE_ENV || 'development',
+        missingEnv: missingRequiredEnvVars,
+        services: {
+            databaseConfigured: Boolean(
+                process.env.SUPABASE_HOST &&
+                process.env.SUPABASE_USER &&
+                process.env.SUPABASE_PASSWORD &&
+                process.env.SUPABASE_DATABASE
+            ),
+            stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
+            brevoConfigured: isBrevoConfigured
+        }
+    };
+
+    try {
+        await query('SELECT 1');
+        health.services.databaseReachable = true;
+    } catch (error) {
+        health.services.databaseReachable = false;
+        health.databaseError = error.message;
+        health.success = false;
+    }
+
+    res.status(health.success ? 200 : 500).json(health);
 });
 
 // TEST DATABASE CONNECTION API
 app.get('/api/test-db', async (req, res) => {
     try {
         const result = await query('SELECT NOW() as time, COUNT(*) as user_count FROM "user"');
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             message: 'Database connected!',
             time: result.rows[0].time,
             userCount: parseInt(result.rows[0].user_count)
         });
     } catch (err) {
-        res.status(500).json({ 
-            success: false, 
+        res.status(500).json({
+            success: false,
             message: 'Database connection failed',
-            error: err.message 
+            error: err.message
         });
     }
 });
@@ -150,84 +197,60 @@ app.post('/api/check-email', async (req, res) => {
     }
 });
 
-// ✅ SEND OTP API
+// ✅ SEND OTP API (FIXED)
 app.post('/api/send-otp', async (req, res) => {
     const { email } = req.body;
-    
-    console.log('📧 Sending OTP to:', email);
+
+    console.log("📧 Sending OTP to:", email);
 
     if (!email) {
         return res.status(400).json({
             success: false,
-            message: 'Email is required'
+            message: "Email required"
         });
     }
 
     try {
-        const checkEmailQuery = 'SELECT * FROM "user" WHERE email = $1';
-        const result = await query(checkEmailQuery, [email]);
+        const result = await query('SELECT * FROM "user" WHERE email = $1', [email]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Email not registered'
+                message: "Email not registered"
             });
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const username = result.rows[0].username;
-        
+
         otpStore[email] = {
-            otp: otp,
+            otp,
             expires: Date.now() + 5 * 60 * 1000
         };
 
-        console.log('🔐 Generated OTP for', email, ':', otp);
-
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Password Reset OTP - Smart Museum Jaipur',
-            html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #e94560;">Smart Museum Jaipur</h2>
-                    <h3>Password Reset Request</h3>
-                    <p>Hello ${username},</p>
-                    <p>You requested to reset your password. Use the OTP below to verify your identity:</p>
-                    <div style="background: #f5f5f5; padding: 20px; text-align: center; margin: 20px 0;">
-                        <h1 style="color: #e94560; font-size: 32px; letter-spacing: 5px; margin: 0;">${otp}</h1>
-                    </div>
-                    <p>This OTP will expire in 5 minutes.</p>
-                    <p>If you didn't request this, please ignore this email.</p>
-                    <br>
-                    <p>Best regards,<br>Smart Museum Jaipur Team</p>
-                </div>
+        // ✅ Send email via Brevo
+        await sendBrevoEmail({
+            to: [{ email }],
+            subject: "Password Reset OTP",
+            htmlContent: `
+                <h2>Hello ${username}</h2>
+                <h1>${otp}</h1>
+                <p>Expires in 5 minutes</p>
             `
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error('❌ Error sending OTP:', error);
-                return res.status(500).json({
-                    success: false,
-                    message: 'Failed to send OTP. Please try again.',
-                    error: error.message
-                });
-            }
-            
-            console.log('✅ OTP sent successfully to:', email);
-            
-            res.json({
-                success: true,
-                message: 'OTP sent successfully to your email',
-                otp: otp
-            });
         });
-    } catch (err) {
-        console.error('❌ Database error:', err);
-        return res.status(500).json({
+
+        console.log("✅ OTP sent via Brevo");
+
+        res.json({
+            success: true,
+            message: "OTP sent successfully"
+        });
+
+    } catch (error) {
+        console.log("❌ Brevo error:", error.message);
+        res.status(500).json({
             success: false,
-            message: 'Database error'
+            message: "Failed to send OTP"
         });
     }
 });
@@ -265,7 +288,7 @@ app.post('/api/verify-otp', (req, res) => {
     if (storedOtpData.otp === otp) {
         delete otpStore[email];
         console.log('✅ OTP verified successfully for:', email);
-        
+       
         res.json({
             success: true,
             message: 'OTP verified successfully'
@@ -293,7 +316,9 @@ app.post('/api/reset-password', async (req, res) => {
 
     try {
         const queryText = 'UPDATE "user" SET password = $1 WHERE email = $2';
-        const result = await query(queryText, [newPassword, email]);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        const result = await query(queryText, [hashedPassword, email]);
 
         if (result.rowCount === 0) {
             return res.status(404).json({
@@ -303,7 +328,7 @@ app.post('/api/reset-password', async (req, res) => {
         }
 
         console.log('✅ Password reset successful for:', email);
-        
+       
         res.json({
             success: true,
             message: 'Password reset successfully'
@@ -330,14 +355,14 @@ app.post('/api/register', async (req, res) => {
     try {
         const checkEmailQuery = 'SELECT user_id FROM "user" WHERE email = $1';
         const emailResult = await query(checkEmailQuery, [email]);
-        
+       
         if (emailResult.rows.length > 0) {
             return res.status(400).json({ success: false, message: 'Email already exists!' });
         }
 
         const checkUsernameQuery = 'SELECT user_id FROM "user" WHERE username = $1';
         const usernameResult = await query(checkUsernameQuery, [username]);
-        
+       
         if (usernameResult.rows.length > 0) {
             return res.status(400).json({ success: false, message: 'Username already exists!' });
         }
@@ -345,16 +370,18 @@ app.post('/api/register', async (req, res) => {
         const genderMap = { male: 'Male', female: 'Female', other: 'Other', 'prefer-not-to-say': 'Other' };
         const dbGender = genderMap[gender] || 'Other';
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const insertQuery = `
-            INSERT INTO "user" (username, email, phone_number, gender, age, password) 
+            INSERT INTO "user" (username, email, phone_number, gender, age, password)
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id
         `;
-
-        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null, password]);
-        
+       
+        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null, hashedPassword]);
+       
         console.log('✅ User registered successfully. ID:', insertResult.rows[0].user_id);
         res.json({ success: true, message: 'Registration successful!', user_id: insertResult.rows[0].user_id, username });
-        
+       
     } catch (err) {
         console.error('❌ Registration error:', err);
         return res.status(500).json({ success: false, message: 'Registration failed!', error: err.message });
@@ -373,13 +400,15 @@ app.post('/api/login', async (req, res) => {
     try {
         const queryText = 'SELECT * FROM "user" WHERE username = $1';
         const result = await query(queryText, [username]);
-        
+       
         if (result.rows.length === 0) {
             return res.status(401).json({ success: false, message: 'Invalid username or password!' });
         }
 
         const user = result.rows[0];
-        if (password !== user.password) {
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
             return res.status(401).json({ success: false, message: 'Invalid username or password!' });
         }
 
@@ -391,10 +420,10 @@ app.post('/api/login', async (req, res) => {
             gender: user.gender,
             age: user.age
         };
-        
+       
         console.log("✅ Login successful, user_id:", user.user_id);
         res.json({ success: true, message: 'Login successful!', user: userData });
-        
+       
     } catch (err) {
         console.error('❌ Login error:', err);
         return res.status(500).json({ success: false, message: 'Database error' });
@@ -407,7 +436,7 @@ app.get("/api/user/:id", async (req, res) => {
     try {
         const sql = "SELECT username, email, phone_number, gender, age FROM \"user\" WHERE user_id = $1";
         const result = await query(sql, [userId]);
-        
+       
         if (result.rows.length === 0) {
             return res.send({ success: false });
         }
@@ -442,7 +471,9 @@ app.post("/api/admin/login", async (req, res) => {
         }
 
         const admin = result.rows[0];
-        if (admin.password !== password) {
+        const isMatch = await bcrypt.compare(password, admin.password);
+
+        if (!isMatch) {
             return res.status(401).json({
                 success: false,
                 message: "Invalid admin username or password"
@@ -471,18 +502,11 @@ app.post("/api/admin/login", async (req, res) => {
 app.post("/api/admin/send-otp", async (req, res) => {
     const { email } = req.body;
 
-    if (!email) {
-        return res.status(400).json({ success: false, message: "Email required" });
-    }
-
     try {
         const result = await query("SELECT * FROM admin WHERE email = $1", [email]);
 
         if (result.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Admin email not registered"
-            });
+            return res.status(404).json({ success: false });
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -492,16 +516,17 @@ app.post("/api/admin/send-otp", async (req, res) => {
             expires: Date.now() + 5 * 60 * 1000
         };
 
-        transporter.sendMail({
-            to: email,
-            subject: "Admin OTP - Smart Museum",
-            html: `<h2>Admin Password Reset</h2><h1>${otp}</h1>`
-        }, err => {
-            if (err) return res.status(500).json({ success: false, message: "Email failed" });
-            res.json({ success: true, message: "OTP sent" });
+        await sendBrevoEmail({
+            to: [{ email }],
+            subject: "Admin OTP",
+            htmlContent: `<h1>${otp}</h1>`,
+            senderName: "Smart Museum"
         });
+
+        res.json({ success: true, message: "OTP sent" });
+
     } catch (err) {
-        return res.status(500).json({ success: false, message: "DB error" });
+        res.status(500).json({ success: false });
     }
 });
 
@@ -520,7 +545,8 @@ app.post("/api/admin/reset-password", async (req, res) => {
     const { email, newPassword } = req.body;
 
     try {
-        await query("UPDATE admin SET password = $1 WHERE email = $2", [newPassword, email]);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await query("UPDATE admin SET password = $1 WHERE email = $2", [hashedPassword, email]);
         delete adminOtpStore[email];
         res.json({ success: true, message: "Password reset successful" });
     } catch (err) {
@@ -533,7 +559,7 @@ app.get("/api/museums", async (req, res) => {
     const { city, category } = req.query;
 
     let sql = `
-        SELECT 
+        SELECT
             id,
             name,
             description,
@@ -653,8 +679,8 @@ app.put('/api/admin/museum/:id', async (req, res) => {
 
     try {
         const queryText = `
-            UPDATE museums 
-            SET name=$1, description=$2, address=$3, open_time=$4, close_time=$5, 
+            UPDATE museums
+            SET name=$1, description=$2, address=$3, open_time=$4, close_time=$5,
                 main_image=$6, city=$7, category=$8
             WHERE id=$9
         `;
@@ -811,18 +837,15 @@ app.get("/api/admin/users", async (req, res) => {
 // ADMIN BOOKINGS LIST - FIXED
 app.get("/api/admin/bookings", async (req, res) => {
     try {
-       
         const countResult = await query("SELECT COUNT(*) as count FROM booking");
         console.log("📊 Total bookings in DB:", countResult.rows[0].count);
-        
-      
+       
         if (parseInt(countResult.rows[0].count) === 0) {
             return res.json({ success: true, bookings: [] });
         }
-        
-        
+       
         const sql = `
-            SELECT 
+            SELECT
                 b.booking_id,
                 b.name,
                 COALESCE(m.name, 'Unknown Museum') AS museum_name,
@@ -836,19 +859,17 @@ app.get("/api/admin/bookings", async (req, res) => {
             LEFT JOIN museums m ON b.museum_id = m.id
             ORDER BY b.booking_date DESC
         `;
-        
+       
         const result = await query(sql);
         console.log(`✅ Found ${result.rows.length} bookings with museum names`);
-        
-      
+       
         if (result.rows.length > 0) {
             console.log("📋 First booking:", {
                 id: result.rows[0].booking_id,
-                museum_id: result.rows[0].museum_id,
                 museum_name: result.rows[0].museum_name
             });
         }
-        
+       
         res.json({ success: true, bookings: result.rows });
     } catch (err) {
         console.error("❌ Booking error:", err);
@@ -860,7 +881,7 @@ app.get("/api/admin/bookings", async (req, res) => {
 app.post("/api/create-checkout-session", async (req, res) => {
     try {
         const { museumName, ticketType, email, visitDate, amount, museumId, userName, userAge, phoneNumber, gender, userId } = req.body;
-        
+       
         console.log("📨 Creating checkout session:", {
             email, museumName, museumId, visitDate, amount, userId
         });
@@ -895,8 +916,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
                 gender: gender || "",
                 userId: userId || ""
             },
-            success_url:"http://localhost:5500/frontend/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url: "http://localhost:5500/payment-cancel.html",
+            success_url: "https://museum-rosy.vercel.app/payment-success.html?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url: "https://museum-rosy.vercel.app/payment-cancel.html",
         });
 
         console.log("✅ Session created:", session.id);
@@ -917,7 +938,7 @@ app.get("/api/payment-success", async (req, res) => {
 
     try {
         const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
-        
+       
         if (session.payment_status !== "paid") {
             console.log("❌ Payment not completed");
             return res.json({ success: false, error: "Payment not completed" });
@@ -928,12 +949,20 @@ app.get("/api/payment-success", async (req, res) => {
 
         const { museumName, ticketType, email, visitDate, museumId, userName, userAge, phoneNumber, gender, userId } = metadata;
 
+        // Sunday booking restriction
+        const selectedDate = new Date(visitDate);
+        if (selectedDate.getDay() === 0) {
+            return res.json({
+                success: false,
+                message: "Museums are closed on Sunday. Booking not allowed."
+            });
+        }
+
         if (!email) {
             console.log("❌ ERROR: No email in metadata!");
             return res.json({ success: false, error: "Email not found in session" });
         }
 
-     
         let finalGender = "Other";
         if (gender) {
             const genderLower = gender.toLowerCase().trim();
@@ -947,8 +976,8 @@ app.get("/api/payment-success", async (req, res) => {
         }
         console.log("👤 Gender conversion:", { original: gender, converted: finalGender });
 
-        const bookingId = uuidv4().substring(0, 20); 
-        
+        const bookingId = uuidv4().substring(0, 20);
+       
         let adult = 1, child = 0;
         if (ticketType) {
             const numbers = ticketType.match(/\d+/g);
@@ -977,18 +1006,17 @@ app.get("/api/payment-success", async (req, res) => {
         // Create PDF
         const buffers = [];
         const doc = new PDFDocument();
-        
+       
         doc.on("data", buffers.push.bind(buffers));
-        
+       
         doc.on("end", async () => {
             const pdfData = Buffer.concat(buffers);
-            
+           
             try {
-                const mailResult = await transporter.sendMail({
-                    from: `"Smart Museum Jaipur" <${process.env.EMAIL_USER}>`,
-                    to: email,
-                    subject: "Your Museum Ticket - Smart Museum Jaipur 🎟️",
-                    html: `
+                await sendBrevoEmail({
+                    to: [{ email }],
+                    subject: "Your Museum Ticket 🎟️",
+                    htmlContent: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px;">
                             <h2 style="color: #e94560;">Smart Museum Jaipur</h2>
                             <p>Thank you for your purchase!</p>
@@ -1009,22 +1037,19 @@ app.get("/api/payment-success", async (req, res) => {
                             <p>Best regards,<br>Smart Museum Jaipur Team</p>
                         </div>
                     `,
-                    attachments: [{
-                        filename: `ticket-${bookingId}.pdf`,
-                        content: pdfData,
-                        contentType: 'application/pdf'
+                    attachment: [{
+                        content: pdfData.toString("base64"),
+                        name: `ticket-${bookingId}.pdf`
                     }]
                 });
 
                 console.log("✅ EMAIL SENT SUCCESSFULLY");
-                console.log("   Message ID:", mailResult.messageId);
-
             } catch (emailError) {
                 console.log("❌ EMAIL ERROR:", emailError.message);
                 console.log("   Continuing with database save...");
             }
 
-         
+            // Save to PostgreSQL
             const sql = `INSERT INTO booking (
                 booking_id, name, age, email, phone_number, gender,
                 visit_date, num_adults, num_children, amount_paid,
@@ -1037,7 +1062,7 @@ app.get("/api/payment-success", async (req, res) => {
                 userAge ? parseInt(userAge) : null,
                 email,
                 phoneNumber || null,
-                finalGender,  
+                finalGender,
                 visitDate,
                 adult,
                 child,
@@ -1057,30 +1082,30 @@ app.get("/api/payment-success", async (req, res) => {
                 await query(sql, values);
                 console.log("✅ Booking saved to database with ID:", bookingId);
                 console.log("   User ID saved:", userId);
-                
-                res.json({ 
-                    success: true, 
+               
+                res.json({
+                    success: true,
                     message: "Booking confirmed!",
                     bookingId: bookingId,
                     emailSent: false
                 });
             } catch (dbError) {
                 console.error("❌ DB Save Error:", dbError);
-                return res.json({ 
-                    success: false, 
+                return res.json({
+                    success: false,
                     error: "Database save failed",
                     details: dbError.message,
-                    bookingId: bookingId 
+                    bookingId: bookingId
                 });
             }
         });
 
-        
+        // Generate PDF content
         doc.fontSize(24).text("SMART MUSEUM JAIPUR", { align: "center" });
         doc.moveDown();
         doc.fontSize(16).text("ENTRY TICKET", { align: "center" });
         doc.moveDown(2);
-        
+       
         doc.fontSize(12);
         doc.text(`Booking ID: ${bookingId}`);
         doc.text(`Name: ${userName || "Guest"}`);
@@ -1095,7 +1120,7 @@ app.get("/api/payment-success", async (req, res) => {
         doc.moveDown();
         doc.text(`Amount Paid: ₹${(session.amount_total / 100).toFixed(2)}`);
         doc.moveDown(2);
-        
+       
         try {
             const barcode = await bwipjs.toBuffer({
                 bcid: "code128",
@@ -1108,7 +1133,7 @@ app.get("/api/payment-success", async (req, res) => {
         } catch (barcodeError) {
             console.log("❌ Barcode error:", barcodeError);
         }
-        
+       
         doc.moveDown();
         doc.fontSize(10).text("Please show this ticket at the entrance.", { align: "center" });
         doc.end();
@@ -1142,7 +1167,7 @@ app.get("/api/user/:userId/bookings", async (req, res) => {
     }
 
     const sql = `
-        SELECT 
+        SELECT
             b.booking_id,
             b.name,
             b.visit_date,
@@ -1200,32 +1225,31 @@ app.get('/api/admin/stats', async (req, res) => {
     }
 });
 
-// ADMIN DASHBOARD APIs 
+// ADMIN DASHBOARD APIs - MONTHLY REVENUE
 app.get('/api/admin/monthly-revenue', async (req, res) => {
     try {
         console.log("📊 Fetching monthly revenue...");
-        
-        
+       
         const queryText = `
-            SELECT 
+            SELECT
                 TO_CHAR(booking_date, 'YYYY-MM') as month,
                 SUM(amount_paid) as total_revenue
-            FROM booking 
+            FROM booking
             WHERE booking_date IS NOT NULL
             GROUP BY TO_CHAR(booking_date, 'YYYY-MM')
             ORDER BY month ASC
             LIMIT 6
         `;
-        
+       
         const result = await query(queryText);
         console.log("Monthly revenue query result:", result.rows);
-        
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+       
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        
+       
         const months = [];
         const revenues = [];
-        
+       
         result.rows.forEach(row => {
             const [year, month] = row.month.split('-');
             const monthName = monthNames[parseInt(month) - 1];
@@ -1233,8 +1257,7 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
             revenues.push(parseFloat(row.total_revenue));
             console.log(`Month: ${monthName} ${year}, Revenue: ${row.total_revenue}`);
         });
-        
-      
+       
         if (months.length === 0) {
             console.log("No revenue data found, sending sample data");
             res.json({
@@ -1247,10 +1270,9 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
                 revenues: revenues
             });
         }
-        
+       
     } catch (error) {
         console.error('Revenue fetch error:', error);
-       
         res.json({
             months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
             revenues: [0, 0, 0, 0, 0, 0]
@@ -1258,12 +1280,12 @@ app.get('/api/admin/monthly-revenue', async (req, res) => {
     }
 });
 
-// Get popular museums 
+// Get popular museums
 app.get('/api/admin/popular-museums', async (req, res) => {
     try {
         const queryText = `
-            SELECT 
-                COALESCE(m.name, 'Unknown Museum') as name, 
+            SELECT
+                COALESCE(m.name, 'Unknown Museum') as name,
                 COUNT(b.booking_id) as "bookingCount"
             FROM museums m
             LEFT JOIN booking b ON m.id = b.museum_id
@@ -1271,7 +1293,7 @@ app.get('/api/admin/popular-museums', async (req, res) => {
             ORDER BY "bookingCount" DESC
             LIMIT 5
         `;
-        
+       
         const result = await query(queryText);
         console.log("🏆 Popular museums:", result.rows);
         res.json(result.rows);
@@ -1280,11 +1302,12 @@ app.get('/api/admin/popular-museums', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 // Get recent bookings
 app.get('/api/admin/recent-bookings', async (req, res) => {
     try {
         const queryText = `
-            SELECT 
+            SELECT
                 b.booking_id as id,
                 COALESCE(b.name, 'Guest') as userName,
                 COALESCE(m.name, 'Museum ID: ' || b.museum_id) as museumName,
@@ -1297,21 +1320,21 @@ app.get('/api/admin/recent-bookings', async (req, res) => {
             ORDER BY b.booking_date DESC
             LIMIT 10
         `;
-        
+       
         const result = await query(queryText);
         console.log(`📋 Found ${result.rows.length} recent bookings`);
-        
-     
+       
         if (result.rows.length > 0) {
             console.log("📋 First recent booking:", result.rows[0]);
         }
-        
+       
         res.json(result.rows);
     } catch (error) {
         console.error('Recent bookings error:', error);
         res.status(500).json({ error: error.message });
     }
 });
+
 app.listen(process.env.PORT || 5000, () => {
     console.log(`🚀 Server running on http://localhost:${process.env.PORT || 5000}`);
     console.log(`📋 Test endpoint: http://localhost:${process.env.PORT || 5000}/api/test`);
