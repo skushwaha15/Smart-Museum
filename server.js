@@ -82,6 +82,28 @@ const sendBrevoEmail = async ({ to, toName, subject, html, attachments = [] }) =
         throw new Error("BREVO_SENDER_EMAIL is not configured");
     }
 
+    const emailPayload = {
+        sender: {
+            name: brevoSenderName,
+            email: brevoSenderEmail
+        },
+        to: [{
+            email: to,
+            name: toName || to
+        }],
+        subject,
+        htmlContent: html
+    };
+
+    if (attachments.length > 0) {
+        emailPayload.attachment = attachments.map(attachment => ({
+            name: attachment.filename,
+            content: Buffer.isBuffer(attachment.content)
+                ? attachment.content.toString("base64")
+                : Buffer.from(attachment.content).toString("base64")
+        }));
+    }
+
     const response = await fetch(BREVO_EMAIL_API_URL, {
         method: "POST",
         headers: {
@@ -89,24 +111,7 @@ const sendBrevoEmail = async ({ to, toName, subject, html, attachments = [] }) =
             "api-key": process.env.BREVO_API_KEY,
             "content-type": "application/json"
         },
-        body: JSON.stringify({
-            sender: {
-                name: brevoSenderName,
-                email: brevoSenderEmail
-            },
-            to: [{
-                email: to,
-                name: toName || to
-            }],
-            subject,
-            htmlContent: html,
-            attachment: attachments.map(attachment => ({
-                name: attachment.filename,
-                content: Buffer.isBuffer(attachment.content)
-                    ? attachment.content.toString("base64")
-                    : Buffer.from(attachment.content).toString("base64")
-            }))
-        })
+        body: JSON.stringify(emailPayload)
     });
 
     const responseText = await response.text();
