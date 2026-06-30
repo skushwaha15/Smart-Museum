@@ -5,6 +5,7 @@ const Stripe = require('stripe');
 const PDFDocument = require("pdfkit");
 const bwipjs = require("bwip-js");
 const { v4: uuidv4 } = require("uuid");
+const bcrypt = require("bcrypt");
 
 
 require('dotenv').config();
@@ -22,6 +23,8 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const BCRYPT_SALT_ROUNDS = 10;
 
 // ==================== SUPABASE CONNECTION ====================
 const pool = new Pool({
@@ -59,6 +62,58 @@ const query = async (text, params) => {
         throw err;
     }
 };
+
+const hashPassword = (password) => bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+
+const isBcryptHash = (password) => typeof password === "string" && /^\$2[aby]\$\d{2}\$/.test(password);
+
+const verifyPassword = async (password, storedPassword) => {
+    if (!storedPassword) {
+        return false;
+    }
+
+    if (isBcryptHash(storedPassword)) {
+        return bcrypt.compare(password, storedPassword);
+    }
+
+    return password === storedPassword;
+};
+
+const migratePlainTextPasswords = async () => {
+    try {
+        const usersResult = await query('SELECT user_id, password FROM "user"');
+        let migratedUsers = 0;
+
+        for (const user of usersResult.rows) {
+            if (user.password && !isBcryptHash(user.password)) {
+                await query('UPDATE "user" SET password = $1 WHERE user_id = $2', [
+                    await hashPassword(user.password),
+                    user.user_id
+                ]);
+                migratedUsers += 1;
+            }
+        }
+
+        const adminsResult = await query('SELECT username, password FROM admin');
+        let migratedAdmins = 0;
+
+        for (const admin of adminsResult.rows) {
+            if (admin.password && !isBcryptHash(admin.password)) {
+                await query('UPDATE admin SET password = $1 WHERE username = $2', [
+                    await hashPassword(admin.password),
+                    admin.username
+                ]);
+                migratedAdmins += 1;
+            }
+        }
+
+        console.log(`Password hash migration complete. Users: ${migratedUsers}, Admins: ${migratedAdmins}`);
+    } catch (err) {
+        console.error('Password hash migration failed:', err.message);
+    }
+};
+
+migratePlainTextPasswords();
 
 // ==================== BREVO EMAIL CONFIGURATION ====================
 const BREVO_EMAIL_API_URL = "https://api.brevo.com/v3/smtp/email";
@@ -338,8 +393,9 @@ app.post('/api/reset-password', async (req, res) => {
     }
 
     try {
+        const hashedPassword = await hashPassword(newPassword);
         const queryText = 'UPDATE "user" SET password = $1 WHERE email = $2';
-        const result = await query(queryText, [newPassword, email]);
+        const result = await query(queryText, [hashedPassword, email]);
 
         if (result.rowCount === 0) {
             return res.status(404).json({
@@ -365,7 +421,7 @@ app.post('/api/reset-password', async (req, res) => {
 
 // REGISTER
 app.post('/api/register', async (req, res) => {
-    console.log('📨 Registration request:', req.body);
+    console.log('Registration request:', { username: req.body.username, email: req.body.email, phone_number: req.body.phone_number, gender: req.body.gender, age: req.body.age });
 
     const { username, email, phone_number, gender, age, password } = req.body;
 
@@ -396,7 +452,8 @@ app.post('/api/register', async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id
         `;
 
-        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null, password]);
+        const hashedPassword = await hashPassword(password);
+        const insertResult = await query(insertQuery, [username, email, phone_number, dbGender, age || null, hashedPassword]);
         
         console.log('✅ User registered successfully. ID:', insertResult.rows[0].user_id);
         res.json({ success: true, message: 'Registration successful!', user_id: insertResult.rows[0].user_id, username });
@@ -424,7 +481,10 @@ app.post('/api/login', async (req, res) => {
         if (adminResult.rows.length > 0) {
             const admin = adminResult.rows[0];
 
-            if (admin.password === password) {
+            if (await verifyPassword(password, admin.password)) {
+                if (!isBcryptHash(admin.password)) {
+                    await query("UPDATE admin SET password = $1 WHERE username = $2", [await hashPassword(password), username]);
+                }
                 console.log("✅ Admin login successful");
 
                 return res.json({
@@ -448,8 +508,12 @@ app.post('/api/login', async (req, res) => {
 
         const user = userResult.rows[0];
 
-        if (user.password !== password) {
+        if (!(await verifyPassword(password, user.password))) {
             return res.status(401).json({ success: false, message: 'Invalid username or password!' });
+        }
+
+        if (!isBcryptHash(user.password)) {
+            await query('UPDATE "user" SET password = $1 WHERE user_id = $2', [await hashPassword(password), user.user_id]);
         }
 
         console.log("✅ User login successful");
@@ -513,11 +577,15 @@ app.post("/api/admin/login", async (req, res) => {
         }
 
         const admin = result.rows[0];
-        if (admin.password !== password) {
+        if (!(await verifyPassword(password, admin.password))) {
             return res.status(401).json({
                 success: false,
                 message: "Invalid admin username or password"
             });
+        }
+
+        if (!isBcryptHash(admin.password)) {
+            await query("UPDATE admin SET password = $1 WHERE username = $2", [await hashPassword(password), username]);
         }
 
         console.log("✅ Admin logged in successfully");
@@ -593,7 +661,8 @@ app.post("/api/admin/reset-password", async (req, res) => {
     const { email, newPassword } = req.body;
 
     try {
-        await query("UPDATE admin SET password = $1 WHERE email = $2", [newPassword, email]);
+        const hashedPassword = await hashPassword(newPassword);
+        await query("UPDATE admin SET password = $1 WHERE email = $2", [hashedPassword, email]);
         delete adminOtpStore[email];
         res.json({ success: true, message: "Password reset successful" });
     } catch (err) {
@@ -1402,3 +1471,4 @@ app.listen(process.env.PORT || 5000, () => {
     console.log(`🔗 Connected to Supabase PostgreSQL`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
+
