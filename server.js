@@ -1463,6 +1463,11 @@ app.get('/api/admin/recent-bookings', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+//cornjob
+app.get("/ping-db", async (req, res) => {
+  await supabase.from("your_table").select("*").limit(1);
+  res.send("Database is active");
+});
 app.listen(process.env.PORT || 5000, () => {
     console.log(`🚀 Server running on http://localhost:${process.env.PORT || 5000}`);
     console.log(`📋 Test endpoint: http://localhost:${process.env.PORT || 5000}/api/test`);
