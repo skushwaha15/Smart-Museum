@@ -1465,8 +1465,13 @@ app.get('/api/admin/recent-bookings', async (req, res) => {
 });
 //cornjob
 app.get("/ping-db", async (req, res) => {
-  await supabase.from("your_table").select("*").limit(1);
-  res.send("Database is active");
+    try {
+        await query('SELECT 1');
+        res.status(200).send("Supabase database is active");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Database error");
+    }
 });
 app.listen(process.env.PORT || 5000, () => {
     console.log(`🚀 Server running on http://localhost:${process.env.PORT || 5000}`);
